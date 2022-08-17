@@ -1,0 +1,10 @@
+{
+	"attributes": {
+		"DistributionExtension": {
+			"ContentManifests": [
+				"path/to/manifest1.json",
+				"path/to/manifest2.json"
+			]
+		}
+	}
+}

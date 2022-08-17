@@ -1,0 +1,41 @@
+{
+	"name": "mwstake/mediawiki-component-contentprovisiner",
+	"description": "Provides classes and services to import content into MediaWiki",
+	"license": "GPL-3.0-only",
+	"authors": [
+		{
+			"name": "HalloWelt! GmbH",
+			"email": "support@bluespice.com"
+		}
+	],
+	"require-dev": {
+		"jakub-onderka/php-parallel-lint": "v1.0.0",
+		"jakub-onderka/php-console-highlighter": "0.4.0",
+		"mediawiki/mediawiki-codesniffer": "v29.0.0",
+		"mediawiki/minus-x": "1.0.0",
+		"phpunit/phpunit": "^8.5"
+	},
+	"autoload": {
+		"psr-4": {
+			"MWStake\\MediaWiki\\Component\\ContentProvisioner\\": "src/",
+			"MWStake\\MediaWiki\\Component\\ContentProvisioner\\Tests\\": "tests/"
+		},
+		"files": [
+			"bootstrap.php"
+		]
+	},
+	"scripts": {
+		"test": [
+			"parallel-lint . --exclude vendor --exclude node_modules",
+			"minus-x check .",
+			"phpcs -sp"
+		],
+		"fix": [
+			"minus-x fix .",
+			"phpcbf"
+		],
+		"unittest": [
+			"../../../tests/phpunit/phpunit.php tests/phpunit"
+		]
+	}
+}
