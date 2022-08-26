@@ -1,0 +1,3 @@
+And again some content......
+
+This page is here to check that it will be imported using exactly "target" title, which differs from original page title.

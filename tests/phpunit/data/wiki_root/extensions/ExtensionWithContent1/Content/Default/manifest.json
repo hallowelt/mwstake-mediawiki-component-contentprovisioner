@@ -1,0 +1,37 @@
+{
+	"Test_page_1": {
+		"lang": "en",
+		"target_title": "Test_page_1",
+		"content_path": "/pages/Main/Test_page_1.wiki",
+		"sha1": "8699555aad3ab5a0a4ec6b90c201c59bee9f0715",
+		"old_sha1": []
+	},
+	"Test_page_2": {
+		"lang": "en",
+		"target_title": "Test_page_2",
+		"content_path": "/pages/Main/Test_page_2.wiki",
+		"sha1": "f66330bf8c55bf9deea7cc70426732e4355afcb0",
+		"old_sha1": []
+	},
+	"Test_page_3": {
+		"lang": "en",
+		"target_title": "Target_page_3",
+		"content_path": "/pages/Main/Test_page_3.wiki",
+		"sha1": "5353b4b81cc03bfbb8ab10e91ef291340f83c92a",
+		"old_sha1": []
+	},
+	"Testseite_1": {
+		"lang": "de",
+		"target_title": "Testseite_1",
+		"content_path": "/pages/Main/Testseite_1.wiki",
+		"sha1": "4b8d473cd359c5b95f23a91dd713e3f1547a1778",
+		"old_sha1": []
+	},
+	"Template:Test_template_1": {
+		"lang": "en",
+		"target_title": "Template:Test_template_1",
+		"content_path": "/pages/Template/Test_template_1.wiki",
+		"sha1": "58a404eb34c9a2c0e56350e9bce9fe8dda59d81f",
+		"old_sha1": []
+	}
+}

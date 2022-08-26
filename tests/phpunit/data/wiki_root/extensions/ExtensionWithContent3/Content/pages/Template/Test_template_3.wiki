@@ -1,0 +1,4 @@
+Some "template" wiki page content......
+
+This wiki page already exists on wiki (for example it was imported some time ago), but it's outdated.
+Here is fresh content, and it really should be imported into wiki!

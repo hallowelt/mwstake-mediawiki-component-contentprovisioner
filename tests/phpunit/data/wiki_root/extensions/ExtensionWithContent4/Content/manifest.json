@@ -1,0 +1,20 @@
+{
+	"Test_page_5": {
+		"lang": "en",
+		"target_title": "Test_page_5",
+		"content_path": "/pages/Main/Test_page_5.wiki",
+		"sha1": "b63bdbaf2bba96c93b776a9d8f98fd818d17aab8",
+		"old_sha1": [
+			"41341751b23f71caeb77625ce2bfe6d900c3a8c1"
+		]
+	},
+	"Template:Test_template_4": {
+		"lang": "en",
+		"target_title": "Template:Test_template_4",
+		"content_path": "/pages/Template/Test_template_4.wiki",
+		"sha1": "821872d69fc6af43a9d7e91718196ad022a78e17",
+		"old_sha1": [
+			"d1b8ff76f625c27502368ad8e46eca5723e7ead0"
+		]
+	}
+}

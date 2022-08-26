@@ -1,0 +1,4 @@
+Some template wiki page content......
+
+Wiki page with target title already exists on wiki, it was added/changed by user.
+It should not be touched!
