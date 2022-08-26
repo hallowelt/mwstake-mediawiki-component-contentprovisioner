@@ -1,5 +1,5 @@
 {
-	"name": "mwstake/mediawiki-component-contentprovisiner",
+	"name": "mwstake/mediawiki-component-contentprovisioner",
 	"description": "Provides classes and services to import content into MediaWiki",
 	"license": "GPL-3.0-only",
 	"authors": [
