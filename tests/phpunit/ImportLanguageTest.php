@@ -2,8 +2,8 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\Test;
 
-use MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage;
 use MediaWiki\Languages\LanguageFallback;
+use MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -46,6 +46,8 @@ class ImportLanguageTest extends TestCase {
 		$importLanguage = new ImportLanguage( $languageFallbackMock, $wikiContentLanguage );
 		$availableLanguages = [ 'en', 'de', 'pt-br' ];
 
-		$this->assertEquals( $expectedImportLanguage, $importLanguage->getImportLanguage( $availableLanguages ) );
+		$actualImportLanguage = $importLanguage->getImportLanguage( $availableLanguages );
+
+		$this->assertEquals( $expectedImportLanguage, $actualImportLanguage );
 	}
 }

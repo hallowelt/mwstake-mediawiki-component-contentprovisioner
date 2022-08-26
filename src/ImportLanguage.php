@@ -33,7 +33,8 @@ class ImportLanguage {
 	 * Returns fallback language (depending on language of wiki)
 	 *
 	 * @param array $availableLanguages
-	 * @return string Fallback language, "en" if no fallbacks available (in case of unknown language, for example)
+	 * @return string Fallback language, "en" if no fallbacks available
+	 * 		(in case of unknown language, for example)
 	 * @see LanguageFallback::getAll()
 	 */
 	public function getImportLanguage( array $availableLanguages ): string {

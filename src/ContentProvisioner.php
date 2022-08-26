@@ -50,11 +50,17 @@ class ContentProvisioner implements LoggerAwareInterface {
 	private $manifestListProvider;
 
 	/**
+	 * Wiki content language
+	 *
 	 * @var Language
 	 */
 	private $wikiLang;
 
 	/**
+	 * Language fallback service.
+	 * Used to get fallback language for cases when ContentProvisioner does not support
+	 * wiki content language. In such cases we need to find the most suitable "fallback" language.
+	 *
 	 * @var LanguageFallback
 	 */
 	private $languageFallback;
@@ -67,6 +73,10 @@ class ContentProvisioner implements LoggerAwareInterface {
 	/**
 	 * @param IManifestListProvider $manifestListProvider Manifest list provider
 	 * @param string $installPath Wiki installation root path
+	 * @param Language $wikiLang Wiki content language
+	 * @param LanguageFallback $languageFallback Language fallback service.
+	 * 		Used to get fallback language for cases when
+	 * @param TitleFactory $titleFactory
 	 */
 	public function __construct(
 		IManifestListProvider $manifestListProvider,
@@ -129,7 +139,8 @@ class ContentProvisioner implements LoggerAwareInterface {
 	 * For every page at first we check if it already exists.
 	 * If it exists - compare its SHA1 hash with SHA1 saved in manifest.
 	 *
-	 * * If page's SHA1 equals to SHA1 saved in manifest - then page is already up-to-date. Nothing to do here.
+	 * * If page's SHA1 equals to SHA1 saved in manifest - then page is already up-to-date.
+	 * 		Nothing to do here.
 	 * * If page's SHA1 equals to any of previous SHA1 saved in manifest - then page is outdated.
 	 * Update it with fresh content. Path to page content is got from manifest file.
 	 * * If page's SHA1 differs from any of saved in manifest SHA1 - then page was changed by user.
@@ -206,9 +217,6 @@ class ContentProvisioner implements LoggerAwareInterface {
 						$this->logger->info( "...Updating page '{$title->getPrefixedDBkey()}'...\n" );
 
 						$status = $this->importWikiContent( $title, $pageContentPath );
-						if ( !$status->isGood() ) {
-							//$this->logger->info(  );
-						}
 					} else {
 						// User did some changes to the page, do nothing for now
 						$this->logger->info( "Wiki page already exists, but it was changed by user! Skipping...\n" );

@@ -26,7 +26,11 @@ class StaticExtensionProvider implements IManifestListProvider {
 	 * @param array $enabledExtensions
 	 * @param string $installPath
 	 */
-	public function __construct( string $attributeName, array $enabledExtensions, string $installPath ) {
+	public function __construct(
+		string $attributeName,
+		array $enabledExtensions,
+		string $installPath
+	) {
 		$this->attributeName = $attributeName;
 		$this->enabledExtensions = $enabledExtensions;
 		$this->installPath = $installPath;
