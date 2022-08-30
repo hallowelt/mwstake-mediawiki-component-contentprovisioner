@@ -8,29 +8,22 @@ use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
 class ExtensionRegistryProvider implements IManifestListProvider {
 
 	/**
-	 * @var string
-	 */
-	private $attributeName;
-
-	/**
 	 * @var ExtensionRegistry
 	 */
 	private $extensionRegistry;
 
 	/**
-	 * @param string $attributeName
 	 * @param ExtensionRegistry $extensionRegistry
 	 */
-	public function __construct( string $attributeName, ExtensionRegistry $extensionRegistry ) {
-		$this->attributeName = $attributeName;
+	public function __construct( ExtensionRegistry $extensionRegistry ) {
 		$this->extensionRegistry = $extensionRegistry;
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	public function provideManifests(): array {
-		$manifestsList = $this->extensionRegistry->getAttribute( $this->attributeName );
+	public function provideManifests( string $extensionName, string $attributeName ): array {
+		$manifestsList = $this->extensionRegistry->getAttribute( $extensionName . $attributeName );
 
 		return $manifestsList;
 	}

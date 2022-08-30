@@ -20,12 +20,12 @@ class ExtensionRegistryProviderTest extends TestCase {
 		$extensionRegistryMock = $this->createMock( ExtensionRegistry::class );
 		$extensionRegistryMock->method( 'getAttribute' )->willReturn( $expectedManifests );
 
-		$manifestListProvider = new ExtensionRegistryProvider(
-			'SomeExtensionContentManifests',
-			$extensionRegistryMock
-		);
+		$manifestListProvider = new ExtensionRegistryProvider( $extensionRegistryMock );
 
-		$actualManifests = $manifestListProvider->provideManifests();
+		$actualManifests = $manifestListProvider->provideManifests(
+			'ContentProvisioner',
+			'ContentManifests'
+		);
 
 		$this->assertEquals( $expectedManifests, $actualManifests );
 	}
@@ -34,12 +34,12 @@ class ExtensionRegistryProviderTest extends TestCase {
 		$extensionRegistryMock = $this->createMock( ExtensionRegistry::class );
 		$extensionRegistryMock->method( 'getAttribute' )->willReturn( [] );
 
-		$manifestListProvider = new ExtensionRegistryProvider(
-			'SomeExtensionContentManifests',
-			$extensionRegistryMock
-		);
+		$manifestListProvider = new ExtensionRegistryProvider( $extensionRegistryMock );
 
-		$actualManifests = $manifestListProvider->provideManifests();
+		$actualManifests = $manifestListProvider->provideManifests(
+			'ContentProvisioner',
+			'ContentManifests'
+		);
 
 		$this->assertEquals( [], $actualManifests );
 	}

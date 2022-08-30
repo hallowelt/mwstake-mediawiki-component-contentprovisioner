@@ -14,7 +14,6 @@ class StaticExtensionProviderTest extends TestCase {
 		$path = __DIR__ . '/data/wiki_root';
 
 		$manifestListProvider = new StaticExtensionProvider(
-			'ContentManifests',
 			[
 				'DistributionExtension',
 				'DistributionExtension2'
@@ -22,7 +21,10 @@ class StaticExtensionProviderTest extends TestCase {
 			$path
 		);
 
-		$actualManifests = $manifestListProvider->provideManifests();
+		$actualManifests = $manifestListProvider->provideManifests(
+			'ContentProvisioner',
+			'ContentManifests'
+		);
 
 		$expectedManifests = [
 			"path/to/manifest1.json",
@@ -38,7 +40,6 @@ class StaticExtensionProviderTest extends TestCase {
 		$path = __DIR__ . '/data/wrong_path';
 
 		$manifestListProvider = new StaticExtensionProvider(
-			'ContentManifests',
 			[
 				'DistributionExtension',
 				'DistributionExtension2'
@@ -46,7 +47,10 @@ class StaticExtensionProviderTest extends TestCase {
 			$path
 		);
 
-		$actualManifests = $manifestListProvider->provideManifests();
+		$actualManifests = $manifestListProvider->provideManifests(
+			'ContentProvisioner',
+			'ContentManifests'
+		);
 
 		$this->assertEquals( [], $actualManifests );
 	}
@@ -54,13 +58,12 @@ class StaticExtensionProviderTest extends TestCase {
 	public function testNoExtensions() {
 		$path = __DIR__ . '/data/wrong_path';
 
-		$manifestListProvider = new StaticExtensionProvider(
-			'ContentManifests',
-			[],
-			$path
-		);
+		$manifestListProvider = new StaticExtensionProvider( [], $path );
 
-		$actualManifests = $manifestListProvider->provideManifests();
+		$actualManifests = $manifestListProvider->provideManifests(
+			'ContentProvisioner',
+			'ContentManifests'
+		);
 
 		$this->assertEquals( [], $actualManifests );
 	}

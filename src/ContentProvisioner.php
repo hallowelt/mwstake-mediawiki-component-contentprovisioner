@@ -5,6 +5,7 @@ namespace MWStake\MediaWiki\Component\ContentProvisioner;
 use CommentStoreComment;
 use Language;
 use MediaWiki\Languages\LanguageFallback;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MWContentSerializationException;
@@ -19,7 +20,7 @@ use TitleFactory;
 use User;
 use WikiPage;
 
-class ContentProvisioner implements LoggerAwareInterface {
+class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 
 	/**
 	 * Logger object
@@ -71,6 +72,40 @@ class ContentProvisioner implements LoggerAwareInterface {
 	private $titleFactory;
 
 	/**
+	 * @var string
+	 */
+	private $extensionName = 'ContentProvisioner';
+
+	/**
+	 * @var string
+	 */
+	private $attributeName = 'ContentManifests';
+
+	/**
+	 * @inheritDoc
+	 */
+	public static function factory(
+		IManifestListProvider $manifestListProvider
+	): IContentProvisioner {
+		// phpcs:ignore MediaWiki.NamingConventions.ValidGlobalName.allowedPrefix
+		global $IP;
+
+		$services = MediaWikiServices::getInstance();
+
+		$wikiLang = $services->getContentLanguage();
+		$languageFallback = $services->getLanguageFallback();
+		$titleFactory = $services->getTitleFactory();
+
+		return new self(
+			$manifestListProvider,
+			$IP,
+			$wikiLang,
+			$languageFallback,
+			$titleFactory
+		);
+	}
+
+	/**
 	 * @param IManifestListProvider $manifestListProvider Manifest list provider
 	 * @param string $installPath Wiki installation root path
 	 * @param Language $wikiLang Wiki content language
@@ -112,7 +147,10 @@ class ContentProvisioner implements LoggerAwareInterface {
 	 * @throws MWException
 	 */
 	public function provision(): Status {
-		$manifestsList = $this->manifestListProvider->provideManifests();
+		$manifestsList = $this->manifestListProvider->provideManifests(
+			$this->extensionName,
+			$this->attributeName
+		);
 
 		if ( $manifestsList ) {
 			$this->logger->info( "...ContentProvisioner: import started...\n" );

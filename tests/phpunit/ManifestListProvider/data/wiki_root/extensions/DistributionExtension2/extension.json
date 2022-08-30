@@ -1,6 +1,6 @@
 {
 	"attributes": {
-		"DistributionExtension2": {
+		"ContentProvisioner": {
 			"ContentManifests": [
 				"path/to/manifest3.json",
 				"path/to/manifest4.json"

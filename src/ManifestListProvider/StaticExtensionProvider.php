@@ -7,11 +7,6 @@ use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
 class StaticExtensionProvider implements IManifestListProvider {
 
 	/**
-	 * @var string
-	 */
-	private $attributeName;
-
-	/**
 	 * @var array
 	 */
 	private $enabledExtensions;
@@ -22,16 +17,10 @@ class StaticExtensionProvider implements IManifestListProvider {
 	private $installPath;
 
 	/**
-	 * @param string $attributeName
 	 * @param array $enabledExtensions
 	 * @param string $installPath
 	 */
-	public function __construct(
-		string $attributeName,
-		array $enabledExtensions,
-		string $installPath
-	) {
-		$this->attributeName = $attributeName;
+	public function __construct( array $enabledExtensions, string $installPath ) {
 		$this->enabledExtensions = $enabledExtensions;
 		$this->installPath = $installPath;
 	}
@@ -39,7 +28,7 @@ class StaticExtensionProvider implements IManifestListProvider {
 	/**
 	 * @inheritDoc
 	 */
-	public function provideManifests(): array {
+	public function provideManifests( string $extensionName, string $attributeName ): array {
 		$manifestsList = [];
 
 		foreach ( $this->enabledExtensions as $extName ) {
@@ -57,8 +46,13 @@ class StaticExtensionProvider implements IManifestListProvider {
 			$extManifest = json_decode( $extManifestRaw, true );
 			if ( $extManifest && !empty( $extManifest['attributes'] ) ) {
 				foreach ( $extManifest['attributes'] as $extName => $attributes ) {
-					if ( $attributes[$this->attributeName] ) {
-						$manifestsList = array_merge( $manifestsList, $attributes[$this->attributeName] );
+					// We need to check only attributes associated with specified extension
+					if ( $extName !== $extensionName ) {
+						continue;
+					}
+
+					if ( $attributes[$attributeName] ) {
+						$manifestsList = array_merge( $manifestsList, $attributes[$attributeName] );
 					}
 				}
 			}
