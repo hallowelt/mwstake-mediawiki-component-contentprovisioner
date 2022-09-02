@@ -109,9 +109,8 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	 * @param IManifestListProvider $manifestListProvider Manifest list provider
 	 * @param string $installPath Wiki installation root path
 	 * @param Language $wikiLang Wiki content language
-	 * @param LanguageFallback $languageFallback Language fallback service.
-	 * 		Used to get fallback language for cases when
-	 * @param TitleFactory $titleFactory
+	 * @param LanguageFallback $languageFallback Language fallback service
+	 * @param TitleFactory $titleFactory Title factory service
 	 */
 	public function __construct(
 		IManifestListProvider $manifestListProvider,
@@ -131,8 +130,6 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	}
 
 	/**
-	 * Sets logger
-	 *
 	 * @param LoggerInterface $logger
 	 */
 	public function setLogger( LoggerInterface $logger ): void {
@@ -140,11 +137,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	}
 
 	/**
-	 * Gets list of manifests and processes them one by one.
-	 *
-	 * @return Status
-	 * @throws MWContentSerializationException
-	 * @throws MWException
+	 * @inheritDoc
 	 */
 	public function provision(): Status {
 		$manifestsList = $this->manifestListProvider->provideManifests(
@@ -191,6 +184,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	 */
 	private function processManifestFile( string $manifestPath ): void {
 		$pagesList = json_decode( file_get_contents( $manifestPath ), true );
+
 		$availableLanguages = [];
 		foreach ( $pagesList as $pageTitle => $pageData ) {
 			$availableLanguages[$pageData['lang']] = true;
@@ -224,7 +218,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 			if ( !$title->exists( Title::READ_LATEST ) ) {
 				$this->logger->info( "...Creating page '{$title->getPrefixedDBkey()}'...\n" );
 
-				$status = $this->importWikiContent( $title, $pageContentPath );
+				$this->importWikiContent( $title, $pageContentPath );
 			} else {
 				$currentHash = $this->getContentHash( $title );
 
@@ -254,7 +248,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 						$this->logger->info( "Wiki page already exists, but it has outdated content.\n" );
 						$this->logger->info( "...Updating page '{$title->getPrefixedDBkey()}'...\n" );
 
-						$status = $this->importWikiContent( $title, $pageContentPath );
+						$this->importWikiContent( $title, $pageContentPath );
 					} else {
 						// User did some changes to the page, do nothing for now
 						$this->logger->info( "Wiki page already exists, but it was changed by user! Skipping...\n" );
@@ -269,14 +263,15 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	 *
 	 * @param Title $title Target title, which should be imported
 	 * @param string $contentPath Path to the page content. Usually retrieved from manifest file
-	 * @return Status <tt>true</tt> if success, <tt>false</tt> otherwise
+	 * @return bool <tt>true</tt> if success, <tt>false</tt> otherwise
 	 * @throws MWException
 	 * @throws MWContentSerializationException
 	 */
-	private function importWikiContent( Title $title, string $contentPath ): Status {
+	private function importWikiContent( Title $title, string $contentPath ): bool {
 		$pageContent = file_get_contents( $contentPath );
 		if ( !$pageContent ) {
-			return Status::newFatal( "Failed to retrieve page content!" );
+			$this->logger->error( 'Failed to retrieve page content!' );
+			return false;
 		}
 
 		$wikiPage = WikiPage::factory( $title );
@@ -288,9 +283,10 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 		$updater->setContent( SlotRecord::MAIN, $content );
 		$newRevision = $updater->saveRevision( $comment );
 		if ( $newRevision instanceof RevisionRecord ) {
-			return Status::newGood();
+			return true;
 		} else {
-			return Status::newFatal( "Failed to create page!" );
+			$this->logger->error( 'Failed to create page!' );
+			return false;
 		}
 	}
 
