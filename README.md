@@ -63,10 +63,11 @@ This class must be registered as content provisioner, in such way:
 $GLOBALS['mwsgContentProvisioners']['ArbitraryProvisionerKey'] =
 	'\\MediaWiki\\Path\\To\\ArbitraryProvisioner::factory';
 ```
-Or
+Or in "ObjectFactory" style:
 ```php
-$GLOBALS['mwsgContentProvisioners']['ArbitraryProvisionerKey'] =
-	'\\MediaWiki\\Path\\To\\ArbitraryProvisioner';
+$GLOBALS['mwsgContentProvisioners']['ArbitraryProvisionerKey'] = [
+	'factory' => '\\MediaWiki\\Path\\To\\ArbitraryProvisioner'
+];
 ```
 
 ### Register custom content to import
