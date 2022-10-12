@@ -7,6 +7,11 @@ use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
 
 class StaticManifestProvider extends AttributeProvider implements IManifestListProvider {
 
+	/**
+	 * Name of "extension.json" attribute where content manifests are got from.
+	 *
+	 * @var string
+	 */
 	private $attributeName = 'ContentManifests';
 
 	/**

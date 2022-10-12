@@ -2,7 +2,7 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerRegistry;
 
-use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerProvider;
+use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerProvider\ContentProvisionerProvider;
 use MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisionerProvider;
 use MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisionerRegistry;
 use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
