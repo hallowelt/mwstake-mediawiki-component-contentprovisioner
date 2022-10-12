@@ -7,11 +7,19 @@ use Status;
 interface IContentProvisioner {
 
 	/**
+	 * @param string $manifestsKey
+	 * 		Helps to recognize manifests which should be processed by that provisioner.
+	 *		Used in {@link IManifestListProvider}.
 	 * @param IManifestListProvider $manifestListProvider
+	 * 		Used to get all manifests which should be processed by that provisioner.
+	 * 		Usually injected by {@link ContentProvisionerPipeline}.
 	 *
 	 * @return IContentProvisioner
 	 */
-	public static function factory( IManifestListProvider $manifestListProvider ): IContentProvisioner;
+	public static function factory(
+		string $manifestsKey,
+		IManifestListProvider $manifestListProvider
+	): IContentProvisioner;
 
 	/**
 	 * Gets list of manifests and processes them one by one.

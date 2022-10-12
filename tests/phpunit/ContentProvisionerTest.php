@@ -154,6 +154,7 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 		$titleFactory = $services->getTitleFactory();
 
 		$contentProvisioner = new ContentProvisioner(
+			'ManifestsKey',
 			$manifestListProviderMock,
 			$rootPath,
 			$wikiLang,

@@ -2,18 +2,35 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\MediaWiki\Maintenance;
 
-use MediaWiki\Logger\ConsoleLogger;
+use ExtensionRegistry;
+use LoggedUpdateMaintenance;
+use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
 use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerPipeline;
-use MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\GlobalProvider;
+use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerRegistry\FileBasedRegistry;
+use MWStake\MediaWiki\Component\ContentProvisioner\Output\PrintOutput;
 
-class ProvisionContents extends \LoggedUpdateMaintenance {
+class ProvisionContents extends LoggedUpdateMaintenance {
 
 	/**
 	 * @inheritDoc
 	 */
 	protected function doDBUpdates() {
-		$contentProvisionerPipeline = new ContentProvisionerPipeline( new GlobalProvider() );
-		$contentProvisionerPipeline->setLogger( new ConsoleLogger( 'ContentProvisioner' ) );
+		// phpcs:ignore MediaWiki.NamingConventions.ValidGlobalName.allowedPrefix
+		global $IP;
+
+		$enabledExtensions = array_keys( ExtensionRegistry::getInstance()->getAllThings() );
+
+		$contentProvisionerRegistry = new FileBasedRegistry( $enabledExtensions, $IP );
+
+		$objectFactory = MediaWikiServices::getInstance()->getObjectFactory();
+
+		$contentProvisionerPipeline = new ContentProvisionerPipeline(
+			$objectFactory,
+			$contentProvisionerRegistry
+		);
+		$contentProvisionerPipeline->setLogger( LoggerFactory::getInstance( 'ContentProvisioner' ) );
+		$contentProvisionerPipeline->setOutput( new PrintOutput() );
 
 		$contentProvisionerPipeline->execute();
 
@@ -40,9 +57,6 @@ class ProvisionContents extends \LoggedUpdateMaintenance {
 	 * It is used to create dynamic "update key".
 	 * So update key will stay the same (so this script will be skipped) until some manifest changes.
 	 *
-	 * TODO: Probably each content provisioner should calculate hash for its own manifests
-	 * But then we will need to execute only specific content provisioners in pipeline...
-	 *
 	 * @return string MD5 hash
 	 */
 	private function calculateManifestsHash(): string {
@@ -67,17 +81,19 @@ class ProvisionContents extends \LoggedUpdateMaintenance {
 	 * @return array List with manifests' paths
 	 */
 	private function getAllManifests(): array {
-		// Probably we can add a public method to IContentProvisioner interface
-		// to get all manifests related to specific ContentProvisioner.
-		// Then we will be able to run through all content provisioners here,
-		// get manifest list for each of them, and collect all manifests.
-
 		// phpcs:ignore MediaWiki.NamingConventions.ValidGlobalName.allowedPrefix
-		global $mwsgContentManifests;
+		global $IP;
+
+		$enabledExtensions = array_keys( ExtensionRegistry::getInstance()->getAllThings() );
+
+		$contentProvisionerRegistry = new FileBasedRegistry( $enabledExtensions, $IP );
+		$manifestsListProvider = $contentProvisionerRegistry->getManifestListProvider();
 
 		$manifestsList = [];
 
-		foreach ( $mwsgContentManifests as $extensionName => $extensionManifests ) {
+		$allManifests = $manifestsListProvider->provideManifests();
+
+		foreach ( $allManifests as $manifestKey => $extensionManifests ) {
 			$manifestsList = array_merge( $manifestsList, $extensionManifests );
 		}
 

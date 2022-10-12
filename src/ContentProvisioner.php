@@ -10,6 +10,7 @@ use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MWContentSerializationException;
 use MWException;
+use MWStake\MediaWiki\Component\ContentProvisioner\Output\NullOutput;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -20,7 +21,11 @@ use TitleFactory;
 use User;
 use WikiPage;
 
-class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
+class ContentProvisioner implements
+				LoggerAwareInterface,
+				OutputAwareInterface,
+				IContentProvisioner
+{
 
 	/**
 	 * Logger object
@@ -28,6 +33,11 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	 * @var LoggerInterface
 	 */
 	private $logger;
+
+	/**
+	 * @var OutputInterface
+	 */
+	private $output;
 
 	/**
 	 * User which is used to edit pages content
@@ -72,19 +82,18 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	private $titleFactory;
 
 	/**
+	 * Helps to recognize manifests which should be processed by that provisioner.
+	 * Used in {@link IManifestListProvider}.
+	 *
 	 * @var string
 	 */
-	private $extensionName = 'ContentProvisioner';
-
-	/**
-	 * @var string
-	 */
-	private $attributeName = 'ContentManifests';
+	private $manifestsKey;
 
 	/**
 	 * @inheritDoc
 	 */
 	public static function factory(
+		string $manifestsKey,
 		IManifestListProvider $manifestListProvider
 	): IContentProvisioner {
 		// phpcs:ignore MediaWiki.NamingConventions.ValidGlobalName.allowedPrefix
@@ -97,6 +106,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 		$titleFactory = $services->getTitleFactory();
 
 		return new self(
+			$manifestsKey,
 			$manifestListProvider,
 			$IP,
 			$wikiLang,
@@ -106,6 +116,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	}
 
 	/**
+	 * @param string $manifestsKey Manifests key
 	 * @param IManifestListProvider $manifestListProvider Manifest list provider
 	 * @param string $installPath Wiki installation root path
 	 * @param Language $wikiLang Wiki content language
@@ -113,6 +124,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	 * @param TitleFactory $titleFactory Title factory service
 	 */
 	public function __construct(
+		string $manifestsKey,
 		IManifestListProvider $manifestListProvider,
 		string $installPath,
 		Language $wikiLang,
@@ -120,8 +132,11 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 		TitleFactory $titleFactory
 	) {
 		$this->logger = new NullLogger();
+		$this->output = new NullOutput();
+
 		$this->maintenanceUser = User::newSystemUser( 'Mediawiki default' );
 
+		$this->manifestsKey = $manifestsKey;
 		$this->manifestListProvider = $manifestListProvider;
 		$this->installPath = $installPath;
 		$this->wikiLang = $wikiLang;
@@ -137,27 +152,32 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	}
 
 	/**
+	 * @param OutputInterface $output
+	 */
+	public function setOutput( OutputInterface $output ): void {
+		$this->output = $output;
+	}
+
+	/**
 	 * @inheritDoc
 	 */
 	public function provision(): Status {
-		$manifestsList = $this->manifestListProvider->provideManifests(
-			$this->extensionName,
-			$this->attributeName
-		);
+		$manifestsList = $this->manifestListProvider->provideManifests( $this->manifestsKey );
+
+		$this->output->write( "...ContentProvisioner: import started...\n" );
 
 		if ( $manifestsList ) {
-			$this->logger->info( "...ContentProvisioner: import started...\n" );
 			foreach ( $manifestsList as $manifestPath ) {
 				$absoluteManifestPath = $this->installPath . '/' . $manifestPath;
 				if ( file_exists( $absoluteManifestPath ) ) {
-					$this->logger->info( "...Processing manifest file: '$absoluteManifestPath' ...\n" );
+					$this->output->write( "...Processing manifest file: '$absoluteManifestPath' ...\n" );
 					$this->processManifestFile( $absoluteManifestPath );
 				} else {
-					$this->logger->info( "...Manifest file does not exist: '$absoluteManifestPath'\n" );
+					$this->output->write( "...Manifest file does not exist: '$absoluteManifestPath'\n" );
 				}
 			}
 		} else {
-			$this->logger->info( "No manifests to import..." );
+			$this->output->write( "No manifests to import...\n" );
 		}
 
 		return Status::newGood();
@@ -194,18 +214,18 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 		$importLanguageCode = $importLanguage->getImportLanguage(
 			array_keys( $availableLanguages )
 		);
-		$this->logger->info( "...Language to import content: $importLanguageCode\n" );
+		$this->output->write( "...Language to import content: $importLanguageCode\n" );
 
 		foreach ( $pagesList as $pageTitle => $pageData ) {
-			$this->logger->info( "... Processing page: $pageTitle\n" );
+			$this->output->write( "... Processing page: $pageTitle\n" );
 
 			if ( $pageData['lang'] !== $importLanguageCode ) {
-				$this->logger->info( "... Wrong page language. Skipping...\n" );
+				$this->output->write( "... Wrong page language. Skipping...\n" );
 				continue;
 			}
 
 			if ( !isset( $pageData['sha1'] ) || !isset( $pageData['content_path'] ) ) {
-				$this->logger->info( "Wikitext content is not available!\n" );
+				$this->output->write( "Wikitext content is not available!\n" );
 				continue;
 			}
 
@@ -216,7 +236,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 			$pageContentPath = dirname( $manifestPath ) . $pageData['content_path'];
 
 			if ( !$title->exists( Title::READ_LATEST ) ) {
-				$this->logger->info( "...Creating page '{$title->getPrefixedDBkey()}'...\n" );
+				$this->output->write( "...Creating page '{$title->getPrefixedDBkey()}'...\n" );
 
 				$this->importWikiContent( $title, $pageContentPath );
 			} else {
@@ -225,7 +245,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 				// If hashes are equal - then this page is exactly in the same state in which it was delivered
 				if ( $currentHash === $pageData['sha1'] ) {
 					// Currently nothing to do here
-					$this->logger->info( "Wiki page already exists, nothing to update here.\n" );
+					$this->output->write( "Wiki page already exists, nothing to update here.\n" );
 				} else {
 					// If hashes differ - then this page either has old content or was touched by user.
 					// So we'll check if current content hash equals one of the old hashes of page content.
@@ -245,13 +265,13 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 
 					if ( !$changedByUser ) {
 						// Page content is just outdated, so update it
-						$this->logger->info( "Wiki page already exists, but it has outdated content.\n" );
-						$this->logger->info( "...Updating page '{$title->getPrefixedDBkey()}'...\n" );
+						$this->output->write( "Wiki page already exists, but it has outdated content.\n" );
+						$this->output->write( "...Updating page '{$title->getPrefixedDBkey()}'...\n" );
 
 						$this->importWikiContent( $title, $pageContentPath );
 					} else {
 						// User did some changes to the page, do nothing for now
-						$this->logger->info( "Wiki page already exists, but it was changed by user! Skipping...\n" );
+						$this->output->write( "Wiki page already exists, but it was changed by user! Skipping...\n" );
 					}
 				}
 			}
@@ -270,7 +290,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 	private function importWikiContent( Title $title, string $contentPath ): bool {
 		$pageContent = file_get_contents( $contentPath );
 		if ( !$pageContent ) {
-			$this->logger->error( 'Failed to retrieve page content!' );
+			$this->logger->error( "Page '{$title->getDBkey()}': failed to retrieve page content!" );
 			return false;
 		}
 
@@ -285,7 +305,7 @@ class ContentProvisioner implements LoggerAwareInterface, IContentProvisioner {
 		if ( $newRevision instanceof RevisionRecord ) {
 			return true;
 		} else {
-			$this->logger->error( 'Failed to create page!' );
+			$this->logger->error( "Page '{$title->getDBkey()}': failed to create page!" );
 			return false;
 		}
 	}

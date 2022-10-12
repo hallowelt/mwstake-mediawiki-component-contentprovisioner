@@ -1,10 +1,12 @@
 {
 	"attributes": {
-		"ContentProvisioner": {
-			"ContentManifests": [
-				"path/to/manifest3.json",
-				"path/to/manifest4.json"
-			]
+		"MWStakeContentProvisioner": {
+			"ContentManifests": {
+				"ManifestsKey": [
+					"path/to/manifest3.json",
+					"path/to/manifest4.json"
+				]
+			}
 		}
 	}
 }
