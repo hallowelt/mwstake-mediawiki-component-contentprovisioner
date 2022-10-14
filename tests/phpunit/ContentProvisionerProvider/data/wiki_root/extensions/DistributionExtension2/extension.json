@@ -1,0 +1,18 @@
+{
+	"attributes": {
+		"MWStakeContentProvisioner": {
+			"ContentProvisioners": {
+				"SomeArbitraryProvisioner2": {
+					"factory": "\\Some\\Namespace\\SomeArbitraryProvisioner2::factory",
+					"args": [
+						"SomeArbitraryManifestsKey2"
+					],
+					"services": [
+						"SomeArbitraryService1",
+						"SomeArbitraryService4"
+					]
+				}
+			}
+		}
+	}
+}

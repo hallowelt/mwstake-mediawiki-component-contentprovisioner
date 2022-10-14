@@ -2,9 +2,8 @@
 	"attributes": {
 		"MWStakeContentProvisioner": {
 			"ContentManifests": {
-				"ManifestsKey": [
-					"path/to/manifest1.json",
-					"path/to/manifest2.json"
+				"DifferentManifestsKey": [
+					"path/to/manifest5.json"
 				]
 			}
 		}

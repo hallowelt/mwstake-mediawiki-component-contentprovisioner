@@ -2,18 +2,25 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner;
 
-use MediaWiki\MediaWikiServices;
+use Exception;
+use MWStake\MediaWiki\Component\ContentProvisioner\Output\NullOutput;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Status;
+use Wikimedia\ObjectFactory;
 
-class ContentProvisionerPipeline implements LoggerAwareInterface {
+class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInterface {
 
 	/**
-	 * @var IManifestListProvider
+	 * @var ObjectFactory
 	 */
-	private $manifestListProvider;
+	private $objectFactory;
+
+	/**
+	 * @var IContentProvisionerRegistry
+	 */
+	private $contentProvisionerRegistry;
 
 	/**
 	 * @var IContentProvisioner[]
@@ -26,12 +33,53 @@ class ContentProvisionerPipeline implements LoggerAwareInterface {
 	private $logger;
 
 	/**
-	 * @param IManifestListProvider $manifestListProvider
+	 * @var OutputInterface
 	 */
-	public function __construct( IManifestListProvider $manifestListProvider ) {
-		$this->logger = new NullLogger();
+	private $output;
 
-		$this->manifestListProvider = $manifestListProvider;
+	/**
+	 * @param ObjectFactory $objectFactory
+	 * @param IContentProvisionerRegistry $contentProvisionerRegistry
+	 * @param bool $executeDefaultProvisioner
+	 * 		<tt>true</tt> if default content provisioner should be executed,
+	 * 		<tt>false</tt> otherwise. See {@link DefaultContentProvisioner}
+	 */
+	public function __construct(
+		ObjectFactory $objectFactory,
+		IContentProvisionerRegistry $contentProvisionerRegistry,
+		bool $executeDefaultProvisioner = true
+	) {
+		$this->logger = new NullLogger();
+		$this->output = new NullOutput();
+
+		$this->objectFactory = $objectFactory;
+
+		$this->contentProvisionerRegistry = $contentProvisionerRegistry;
+
+		if ( $executeDefaultProvisioner ) {
+
+			$defaultContentProvisionerSpec = [
+				'class' => DefaultContentProvisioner::class,
+				'args' => [
+					'DefaultContentProvisioner'
+				],
+				'services' => [
+					'ContentLanguage',
+					'LanguageFallback',
+					'TitleFactory'
+				]
+			];
+
+			/** @var IContentProvisioner $defaultContentProvisioner */
+			$defaultContentProvisioner = $this->objectFactory->createObject(
+				$defaultContentProvisionerSpec
+			);
+			$defaultContentProvisioner->setManifestListProvider(
+				$this->contentProvisionerRegistry->getManifestListProvider()
+			);
+
+			$this->contentProvisioners[] = $defaultContentProvisioner;
+		}
 	}
 
 	/**
@@ -39,6 +87,13 @@ class ContentProvisionerPipeline implements LoggerAwareInterface {
 	 */
 	public function setLogger( LoggerInterface $logger ): void {
 		$this->logger = $logger;
+	}
+
+	/**
+	 * @param OutputInterface $output
+	 */
+	public function setOutput( OutputInterface $output ): void {
+		$this->output = $output;
 	}
 
 	/**
@@ -57,6 +112,11 @@ class ContentProvisionerPipeline implements LoggerAwareInterface {
 				$contentProvisioner->setLogger( $this->logger );
 			}
 
+			// Pipeline will force its output into content provisioners
+			if ( $contentProvisioner instanceof OutputAwareInterface ) {
+				$contentProvisioner->setOutput( $this->output );
+			}
+
 			$provisionerStatus = $contentProvisioner->provision();
 			$status->merge( $provisionerStatus );
 		}
@@ -68,38 +128,46 @@ class ContentProvisionerPipeline implements LoggerAwareInterface {
 	 * Goes through content provisioners' registry, creates and stores instance for each of them
 	 */
 	private function collectContentProvisioners(): void {
-		// phpcs:ignore MediaWiki.NamingConventions.ValidGlobalName.allowedPrefix
-		global $mwsgContentProvisioners;
+		$contentProvisioners = $this->contentProvisionerRegistry->getProvisioners();
 
-		$objectFactory = MediaWikiServices::getInstance()->getObjectFactory();
+		$manifestListProvider = $this->contentProvisionerRegistry->getManifestListProvider();
 
-		foreach ( $mwsgContentProvisioners as $provisionerKey => $contentProvisioner ) {
+		foreach ( $contentProvisioners as $provisionerKey => $contentProvisionerData ) {
 			$contentProvisionerSpecs = [];
 
-			if ( is_callable( $contentProvisioner ) ) {
-				$contentProvisionerSpecs['factory'] = $contentProvisioner;
+			if ( is_callable( $contentProvisionerData ) ) {
+				$contentProvisionerSpecs['factory'] = $contentProvisionerData;
 			} else {
-				if ( !is_callable( $contentProvisioner['factory'] ) ) {
+				if (
+					is_array( $contentProvisionerData ) &&
+					( isset( $contentProvisionerData['factory'] ) || isset( $contentProvisionerData['class'] ) )
+				) {
+					$contentProvisionerSpecs = $contentProvisionerData;
+				} else {
 					$this->logger->warning( "Content provisioner \"$provisionerKey\" " .
 						"must provide some callable!" );
 					continue;
 				}
-
-				$contentProvisionerSpecs = $contentProvisioner;
 			}
 
-			// Inject manifest list provider into "ContentProvisioner" factory
-			$contentProvisionerSpecs = array_merge( $contentProvisionerSpecs, [
-				'args' => [ $this->manifestListProvider ]
-			] );
+			try {
+				$contentProvisionerObj = $this->objectFactory->createObject( $contentProvisionerSpecs );
+			} catch ( Exception $e ) {
+				$this->logger->error( "\"$provisionerKey\" content provisioner object failed to create," .
+				"exception: {$e->getMessage()}" );
 
-			$contentProvisionerObj = $objectFactory->createObject( $contentProvisionerSpecs );
+				continue;
+			}
 
 			// Check if object is instance of "IContentProvisioner"
 			if ( !$contentProvisionerObj instanceof IContentProvisioner ) {
 				$this->logger->warning( "Content provisioner \"$provisionerKey\" " .
 					"must implement \"IContentProvisioner\" interface!" );
+				continue;
 			}
+
+			// Inject manifest list provider into content provisioner
+			$contentProvisionerObj->setManifestListProvider( $manifestListProvider );
 
 			$this->contentProvisioners[] = $contentProvisionerObj;
 		}

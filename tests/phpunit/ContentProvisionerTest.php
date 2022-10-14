@@ -4,14 +4,14 @@ namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
-use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner;
+use MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner;
 use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
 use TextContent;
 use Title;
 use WikiPage;
 
 /**
- * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner
+ * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner
  * @group Database
  */
 class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
@@ -33,12 +33,12 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * Covers case with regular import of English wiki pages.
 	 * No special cases here.
 	 *
-	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner::provision()
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner::provision()
 	 */
 	public function testRegularEnglish() {
 		$manifestList = [
-			'extensions/ExtensionWithContent1/Content/Default/manifest.json',
-			'extensions/ExtensionWithContent2/Content/manifest.json',
+			__DIR__ . '/data/wiki_root/extensions/ExtensionWithContent1/Content/Default/manifest.json',
+			__DIR__ . '/data/wiki_root/extensions/ExtensionWithContent2/Content/manifest.json',
 		];
 
 		$importLangCode = 'en';
@@ -50,12 +50,12 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * Covers case with regular import of German wiki pages.
 	 * No special cases here.
 	 *
-	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner::provision()
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner::provision()
 	 */
 	public function testRegularGerman() {
 		$manifestList = [
-			'extensions/ExtensionWithContent1/Content/Default/manifest.json',
-			'extensions/ExtensionWithContent2/Content/manifest.json',
+			__DIR__ . '/data/wiki_root/extensions/ExtensionWithContent1/Content/Default/manifest.json',
+			__DIR__ . '/data/wiki_root/extensions/ExtensionWithContent2/Content/manifest.json',
 		];
 
 		$importLangCode = 'de';
@@ -69,11 +69,11 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * "sha1" hash of page content matches one of old "sha1" hashes, saved in manifest.
 	 * It means that this page is just outdated, so its newer version will be imported.
 	 *
-	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner::provision()
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner::provision()
 	 */
 	public function testPageOutdated() {
 		$manifestList = [
-			'extensions/ExtensionWithContent3/Content/manifest.json'
+			__DIR__ . '/data/wiki_root/extensions/ExtensionWithContent3/Content/manifest.json'
 		];
 
 		$importLangCode = 'en';
@@ -88,11 +88,11 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * It means that this page was created/changed by user.
 	 * Content provisioner will do nothing in that case.
 	 *
-	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner::provision()
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner::provision()
 	 */
 	public function testPageChangedByUser() {
 		$manifestList = [
-			'extensions/ExtensionWithContent4/Content/manifest.json'
+			__DIR__ . '/data/wiki_root/extensions/ExtensionWithContent4/Content/manifest.json'
 		];
 
 		$importLangCode = 'en';
@@ -153,13 +153,13 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 		$fallbackLanguage = $services->getLanguageFallback();
 		$titleFactory = $services->getTitleFactory();
 
-		$contentProvisioner = new ContentProvisioner(
-			$manifestListProviderMock,
-			$rootPath,
+		$contentProvisioner = new DefaultContentProvisioner(
 			$wikiLang,
 			$fallbackLanguage,
-			$titleFactory
+			$titleFactory,
+			'ManifestsKey'
 		);
+		$contentProvisioner->setManifestListProvider( $manifestListProviderMock );
 		$contentProvisioner->provision();
 
 		// Check that all wiki pages were successfully imported
@@ -175,20 +175,17 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * Gets list of wiki pages with their content from specified manifests.
 	 *
 	 * @param array $manifestList List of manifests, just an array with paths
-	 * @param string $rootPath Root path
 	 * @param string $langCode Import language code, to get only pages in specified language
 	 *
 	 * @return array Key is page title, value is "sha1" of page content
 	 */
 	private function getExpectedWikiPages(
 		array $manifestList,
-		string $rootPath,
 		string $langCode
 	): array {
 		$expectedWikiPages = [];
 
-		foreach ( $manifestList as $manifestPath ) {
-			$absoluteManifestPath = $rootPath . '/' . $manifestPath;
+		foreach ( $manifestList as $absoluteManifestPath ) {
 			$manifest = json_decode( file_get_contents( $absoluteManifestPath ), true );
 
 			foreach ( $manifest as $pageTitle => $pageData ) {
@@ -213,7 +210,6 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 */
 	private function checkImportedPages( array $expectedWikiPages ): void {
 		$importedPages = [];
-		$contents = [];
 
 		foreach ( $expectedWikiPages as $title => $contentHash ) {
 			// If there is just name title - it's "Main" namespace

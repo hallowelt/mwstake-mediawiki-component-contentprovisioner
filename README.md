@@ -42,37 +42,72 @@ Here, "old_sha1" key contains hashes for previous content versions.
 It is needed for cases with already existing wiki pages, to identify if they are just outdated or were added/changed by user.
 
 
-Such files should be registered that way:
-```php
-$GLOBALS['mwsgContentManifests']['ContentProvisioner'][] =
-	'extensions/SomeExtension/path/to/manifest.json';
+Such files should be registered in "extension.json" of particular extension that way:
+```json
+{
+	"attributes": {
+		"MWStakeContentProvisioner": {
+			"ContentManifests": {
+				"DefaultContentProvisioner": [
+					"extensions/SomeExtension/path/to/manifest.json"
+				]
+			}
+		}
+	}
+}
 ```
+Manifests added to "DefaultContentProvisioner" key will be processed by default content provisioner.
+That content provisioner just imports corresponding wiki pages which are provided by manifest.
 
 All registered files will be processed during next update with "maintenance/update.php".
 
 ## Custom content provisioners
 
 Extensions may implement their own import logic within their own content provisioners.
+To do so, it is needed to have a class, implementing "\MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisioner" interface.
 
 ### Register custom content provisioner
 
-To do so, it is needed to have a class, implementing "\MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisioner" interface.
+To be executed during "update.php", custom content provisioner must be registered in such way (ObjectFactory specification):
+```json
+{
+	"attributes": {
+		"MWStakeContentProvisioner": {
+			"ContentProvisioners": {
+				"ArbitraryContentProvisionerKey": {
+					"class": "\\MediaWiki\\Path\\To\\ArbitraryProvisioner",
+					"args": [
+						"ManifestsKey"
+					],
+					"services": [
+						"ArbitraryService",
+						"SomeOtherService"
+					]
+				}
+			}
+		}
+	}
+}
+```
+Here "ArbitraryContentProvisionerKey" is a key, which is used just to identify content provisioner. It is used mostly for logging.
+"ManifestsKey" is a key which will help to recognize manifests which should be processed by this specific content provisioner.
 
-This class must be registered as content provisioner, in such way:
-```php
-$GLOBALS['mwsgContentProvisioners']['ArbitraryProvisionerKey'] =
-	'\\MediaWiki\\Path\\To\\ArbitraryProvisioner::factory';
-```
-Or
-```php
-$GLOBALS['mwsgContentProvisioners']['ArbitraryProvisionerKey'] =
-	'\\MediaWiki\\Path\\To\\ArbitraryProvisioner';
-```
 
 ### Register custom content to import
 
-Custom manifest file, which will be processed by custom content provisioner, must be registered such way:
-```php
-$GLOBALS['mwsgContentManifests']['ArbitraryProvisionerKey'][] =
-	'extensions/SomeExtension/path/to/arbitrary/manifest.json';
+By default, custom manifest file, which will be processed by custom content provisioner, must be registered such way:
+```json
+{
+	"attributes": {
+		"MWStakeContentProvisioner": {
+			"ContentManifests": {
+				"ManifestsKey": [
+					"extensions/SomeExtension/path1/to/manifest1.json",
+					"extensions/SomeExtension/path2/to/manifest2.json"
+				]
+			}
+		}
+	}
+}
 ```
+Here "ManifestsKey" must be the same value which was passed to that content provisioner as first argument.
