@@ -21,9 +21,9 @@ class StaticManifestProvider extends AttributeProvider implements IManifestListP
 		$allManifests = $this->getAttribute( $this->attributeName );
 
 		// Remove duplicates
-		foreach ( $allManifests as $manifestKey => &$manifestList ) {
-			$manifestList = array_unique( $manifestList );
-		}
+		$allManifests = $this->removeDuplicates( $allManifests );
+		// Expand paths from relative to absolute
+		$allManifests = $this->expandPaths( $allManifests );
 
 		if ( $manifestsKey === '' ) {
 			return $allManifests;
@@ -34,5 +34,33 @@ class StaticManifestProvider extends AttributeProvider implements IManifestListP
 		}
 
 		return [];
+	}
+
+	/**
+	 * @param array $allManifests
+	 *
+	 * @return array
+	 */
+	private function removeDuplicates( array $allManifests ): array {
+		foreach ( $allManifests as $manifestKey => $manifestList ) {
+			$allManifests[$manifestKey] = array_unique( $manifestList );
+		}
+
+		return $allManifests;
+	}
+
+	/**
+	 * @param array $allManifests
+	 *
+	 * @return array
+	 */
+	private function expandPaths( array $allManifests ): array {
+		foreach ( $allManifests as $manifestKey => $manifestList ) {
+			foreach ( $manifestList as $i => $manifestPath ) {
+				$allManifests[$manifestKey][$i] = $this->installPath . '/' . $manifestPath;
+			}
+		}
+
+		return $allManifests;
 	}
 }

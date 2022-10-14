@@ -21,6 +21,8 @@ class ProvisionContents extends LoggedUpdateMaintenance {
 
 		$enabledExtensions = array_keys( ExtensionRegistry::getInstance()->getAllThings() );
 
+		file_put_contents( '/tmp/my_file_2', print_r( $enabledExtensions, true ) );
+
 		$contentProvisionerRegistry = new FileBasedRegistry( $enabledExtensions, $IP );
 
 		$objectFactory = MediaWikiServices::getInstance()->getObjectFactory();

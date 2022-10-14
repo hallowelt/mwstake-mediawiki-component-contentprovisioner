@@ -12,6 +12,8 @@ class StaticManifestProviderTest extends TestCase {
 
 	/**
 	 * Get manifests with specific manifests key
+	 *
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\StaticManifestProvider::provideManifests
 	 */
 	public function testSuccess() {
 		$path = __DIR__ . '/data/wiki_root';
@@ -30,10 +32,10 @@ class StaticManifestProviderTest extends TestCase {
 		);
 
 		$expectedManifests = [
-			"path/to/manifest1.json",
-			"path/to/manifest2.json",
-			"path/to/manifest3.json",
-			"path/to/manifest4.json"
+			"$path/path/to/manifest1.json",
+			"$path/path/to/manifest2.json",
+			"$path/path/to/manifest3.json",
+			"$path/path/to/manifest4.json"
 		];
 
 		$this->assertEquals( $expectedManifests, $actualManifests );
@@ -41,6 +43,8 @@ class StaticManifestProviderTest extends TestCase {
 
 	/**
 	 * Get ALL registered manifests
+	 *
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\StaticManifestProvider::provideManifests
 	 */
 	public function testAllManifests() {
 		$path = __DIR__ . '/data/wiki_root';
@@ -58,13 +62,13 @@ class StaticManifestProviderTest extends TestCase {
 
 		$expectedManifests = [
 			'ManifestsKey' => [
-				"path/to/manifest1.json",
-				"path/to/manifest2.json",
-				"path/to/manifest3.json",
-				"path/to/manifest4.json"
+				"$path/path/to/manifest1.json",
+				"$path/path/to/manifest2.json",
+				"$path/path/to/manifest3.json",
+				"$path/path/to/manifest4.json"
 			],
 			'DifferentManifestsKey' => [
-				"path/to/manifest5.json"
+				"$path/path/to/manifest5.json"
 			]
 		];
 
@@ -73,6 +77,8 @@ class StaticManifestProviderTest extends TestCase {
 
 	/**
 	 * Wrong installation path provided, no manifests found
+	 *
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\StaticManifestProvider::provideManifests
 	 */
 	public function testWrongPath() {
 		$path = __DIR__ . '/data/wrong_path';
@@ -94,6 +100,8 @@ class StaticManifestProviderTest extends TestCase {
 
 	/**
 	 * No enabled extensions, therefore no manifests found
+	 *
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\StaticManifestProvider::provideManifests
 	 */
 	public function testNoExtensions() {
 		$path = __DIR__ . '/data/wrong_path';

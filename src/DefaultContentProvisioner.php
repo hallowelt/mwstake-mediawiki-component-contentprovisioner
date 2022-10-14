@@ -5,7 +5,6 @@ namespace MWStake\MediaWiki\Component\ContentProvisioner;
 use CommentStoreComment;
 use Language;
 use MediaWiki\Languages\LanguageFallback;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MWContentSerializationException;
@@ -21,7 +20,7 @@ use TitleFactory;
 use User;
 use WikiPage;
 
-class ContentProvisioner implements
+class DefaultContentProvisioner implements
 				LoggerAwareInterface,
 				OutputAwareInterface,
 				IContentProvisioner
@@ -58,7 +57,7 @@ class ContentProvisioner implements
 	 *
 	 * @var IManifestListProvider
 	 */
-	private $manifestListProvider;
+	private $manifestListProvider = null;
 
 	/**
 	 * Wiki content language
@@ -90,46 +89,16 @@ class ContentProvisioner implements
 	private $manifestsKey;
 
 	/**
-	 * @inheritDoc
-	 */
-	public static function factory(
-		string $manifestsKey,
-		IManifestListProvider $manifestListProvider
-	): IContentProvisioner {
-		// phpcs:ignore MediaWiki.NamingConventions.ValidGlobalName.allowedPrefix
-		global $IP;
-
-		$services = MediaWikiServices::getInstance();
-
-		$wikiLang = $services->getContentLanguage();
-		$languageFallback = $services->getLanguageFallback();
-		$titleFactory = $services->getTitleFactory();
-
-		return new self(
-			$manifestsKey,
-			$manifestListProvider,
-			$IP,
-			$wikiLang,
-			$languageFallback,
-			$titleFactory
-		);
-	}
-
-	/**
-	 * @param string $manifestsKey Manifests key
-	 * @param IManifestListProvider $manifestListProvider Manifest list provider
-	 * @param string $installPath Wiki installation root path
 	 * @param Language $wikiLang Wiki content language
 	 * @param LanguageFallback $languageFallback Language fallback service
 	 * @param TitleFactory $titleFactory Title factory service
+	 * @param string $manifestsKey Manifests key
 	 */
 	public function __construct(
-		string $manifestsKey,
-		IManifestListProvider $manifestListProvider,
-		string $installPath,
 		Language $wikiLang,
 		LanguageFallback $languageFallback,
-		TitleFactory $titleFactory
+		TitleFactory $titleFactory,
+		string $manifestsKey
 	) {
 		$this->logger = new NullLogger();
 		$this->output = new NullOutput();
@@ -137,11 +106,11 @@ class ContentProvisioner implements
 		$this->maintenanceUser = User::newSystemUser( 'Mediawiki default' );
 
 		$this->manifestsKey = $manifestsKey;
-		$this->manifestListProvider = $manifestListProvider;
-		$this->installPath = $installPath;
 		$this->wikiLang = $wikiLang;
 		$this->languageFallback = $languageFallback;
 		$this->titleFactory = $titleFactory;
+
+		$this->installPath = $GLOBALS['IP'];
 	}
 
 	/**
@@ -161,14 +130,26 @@ class ContentProvisioner implements
 	/**
 	 * @inheritDoc
 	 */
+	public function setManifestListProvider( IManifestListProvider $manifestListProvider ): void {
+		$this->manifestListProvider = $manifestListProvider;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
 	public function provision(): Status {
+		if ( $this->manifestListProvider === null ) {
+			$this->logger->error( 'No manifest list provider set!' );
+
+			return Status::newFatal( 'Import failed to begin. See logs for details.' );
+		}
+
 		$manifestsList = $this->manifestListProvider->provideManifests( $this->manifestsKey );
 
 		$this->output->write( "...ContentProvisioner: import started...\n" );
 
 		if ( $manifestsList ) {
-			foreach ( $manifestsList as $manifestPath ) {
-				$absoluteManifestPath = $this->installPath . '/' . $manifestPath;
+			foreach ( $manifestsList as $absoluteManifestPath ) {
 				if ( file_exists( $absoluteManifestPath ) ) {
 					$this->output->write( "...Processing manifest file: '$absoluteManifestPath' ...\n" );
 					$this->processManifestFile( $absoluteManifestPath );

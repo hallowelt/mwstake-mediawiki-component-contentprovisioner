@@ -64,21 +64,24 @@ All registered files will be processed during next update with "maintenance/upda
 ## Custom content provisioners
 
 Extensions may implement their own import logic within their own content provisioners.
+To do so, it is needed to have a class, implementing "\MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisioner" interface.
 
 ### Register custom content provisioner
 
-To do so, it is needed to have a class, implementing "\MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisioner" interface.
-
-This class must be registered as content provisioner, in such way:
+To be executed during "update.php", custom content provisioner must be registered in such way (ObjectFactory specification):
 ```json
 {
 	"attributes": {
 		"MWStakeContentProvisioner": {
 			"ContentProvisioners": {
 				"ArbitraryContentProvisionerKey": {
-					"factory": "\\MediaWiki\\Path\\To\\ArbitraryProvisioner::factory",
+					"class": "\\MediaWiki\\Path\\To\\ArbitraryProvisioner",
 					"args": [
 						"ManifestsKey"
+					],
+					"services": [
+						"ArbitraryService",
+						"SomeOtherService"
 					]
 				}
 			}
@@ -87,12 +90,12 @@ This class must be registered as content provisioner, in such way:
 }
 ```
 Here "ArbitraryContentProvisionerKey" is a key, which is used just to identify content provisioner. It is used mostly for logging.
-"ManifestsKey" a key which will help to recognize manifests which should be processed by this specific content provisioner.
+"ManifestsKey" is a key which will help to recognize manifests which should be processed by this specific content provisioner.
 
 
 ### Register custom content to import
 
-Custom manifest file, which will be processed by custom content provisioner, must be registered such way:
+By default, custom manifest file, which will be processed by custom content provisioner, must be registered such way:
 ```json
 {
 	"attributes": {
