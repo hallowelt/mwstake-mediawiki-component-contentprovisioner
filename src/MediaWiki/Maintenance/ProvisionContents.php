@@ -16,14 +16,9 @@ class ProvisionContents extends LoggedUpdateMaintenance {
 	 * @inheritDoc
 	 */
 	protected function doDBUpdates() {
-		// phpcs:ignore MediaWiki.NamingConventions.ValidGlobalName.allowedPrefix
-		global $IP;
-
 		$enabledExtensions = array_keys( ExtensionRegistry::getInstance()->getAllThings() );
 
-		file_put_contents( '/tmp/my_file_2', print_r( $enabledExtensions, true ) );
-
-		$contentProvisionerRegistry = new FileBasedRegistry( $enabledExtensions, $IP );
+		$contentProvisionerRegistry = new FileBasedRegistry( $enabledExtensions, $GLOBALS['IP'] );
 
 		$objectFactory = MediaWikiServices::getInstance()->getObjectFactory();
 
@@ -62,14 +57,11 @@ class ProvisionContents extends LoggedUpdateMaintenance {
 	 * @return string MD5 hash
 	 */
 	private function calculateManifestsHash(): string {
-		// phpcs:ignore MediaWiki.NamingConventions.ValidGlobalName.allowedPrefix
-		global $IP;
-
 		$manifestsContent = '';
 
 		$manifestsList = $this->getAllManifests();
 		foreach ( $manifestsList as $manifestPath ) {
-			$absoluteManifestPath = $IP . '/' . $manifestPath;
+			$absoluteManifestPath = $GLOBALS['IP'] . '/' . $manifestPath;
 
 			$manifestsContent .= file_get_contents( $absoluteManifestPath );
 		}
@@ -83,12 +75,9 @@ class ProvisionContents extends LoggedUpdateMaintenance {
 	 * @return array List with manifests' paths
 	 */
 	private function getAllManifests(): array {
-		// phpcs:ignore MediaWiki.NamingConventions.ValidGlobalName.allowedPrefix
-		global $IP;
-
 		$enabledExtensions = array_keys( ExtensionRegistry::getInstance()->getAllThings() );
 
-		$contentProvisionerRegistry = new FileBasedRegistry( $enabledExtensions, $IP );
+		$contentProvisionerRegistry = new FileBasedRegistry( $enabledExtensions, $GLOBALS['IP'] );
 		$manifestsListProvider = $contentProvisionerRegistry->getManifestListProvider();
 
 		$manifestsList = [];
