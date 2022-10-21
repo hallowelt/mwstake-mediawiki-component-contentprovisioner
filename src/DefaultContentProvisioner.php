@@ -46,13 +46,6 @@ class DefaultContentProvisioner implements
 	private $maintenanceUser;
 
 	/**
-	 * Wiki installation root path
-	 *
-	 * @var string
-	 */
-	private $installPath;
-
-	/**
 	 * Manifest list provider
 	 *
 	 * @var IManifestListProvider
@@ -109,8 +102,6 @@ class DefaultContentProvisioner implements
 		$this->wikiLang = $wikiLang;
 		$this->languageFallback = $languageFallback;
 		$this->titleFactory = $titleFactory;
-
-		$this->installPath = $GLOBALS['IP'];
 	}
 
 	/**
