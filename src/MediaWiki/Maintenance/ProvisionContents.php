@@ -60,10 +60,10 @@ class ProvisionContents extends LoggedUpdateMaintenance {
 		$manifestsContent = '';
 
 		$manifestsList = $this->getAllManifests();
-		foreach ( $manifestsList as $manifestPath ) {
-			$absoluteManifestPath = $GLOBALS['IP'] . '/' . $manifestPath;
-
-			$manifestsContent .= file_get_contents( $absoluteManifestPath );
+		foreach ( $manifestsList as $absoluteManifestPath ) {
+			if ( file_exists( $absoluteManifestPath ) ) {
+				$manifestsContent .= file_get_contents( $absoluteManifestPath );
+			}
 		}
 
 		return md5( $manifestsContent );
