@@ -23,6 +23,11 @@ class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInt
 	private $contentProvisionerRegistry;
 
 	/**
+	 * @var array
+	 */
+	private $contentProvisionerSkip;
+
+	/**
 	 * @var IContentProvisioner[]
 	 */
 	private $contentProvisioners = [];
@@ -40,14 +45,12 @@ class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInt
 	/**
 	 * @param ObjectFactory $objectFactory
 	 * @param IContentProvisionerRegistry $contentProvisionerRegistry
-	 * @param bool $executeDefaultProvisioner
-	 * 		<tt>true</tt> if default content provisioner should be executed,
-	 * 		<tt>false</tt> otherwise. See {@link DefaultContentProvisioner}
+	 * @param array $contentProvisionerSkip
 	 */
 	public function __construct(
 		ObjectFactory $objectFactory,
 		IContentProvisionerRegistry $contentProvisionerRegistry,
-		bool $executeDefaultProvisioner = true
+		array $contentProvisionerSkip
 	) {
 		$this->logger = new NullLogger();
 		$this->output = new NullOutput();
@@ -55,8 +58,9 @@ class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInt
 		$this->objectFactory = $objectFactory;
 
 		$this->contentProvisionerRegistry = $contentProvisionerRegistry;
+		$this->contentProvisionerSkip = $contentProvisionerSkip;
 
-		if ( $executeDefaultProvisioner ) {
+		if ( !in_array( 'DefaultContentProvisioner', $this->contentProvisionerSkip ) ) {
 
 			$defaultContentProvisionerSpec = [
 				'class' => DefaultContentProvisioner::class,
@@ -134,6 +138,11 @@ class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInt
 
 		foreach ( $contentProvisioners as $provisionerKey => $contentProvisionerData ) {
 			$contentProvisionerSpecs = [];
+
+			if ( in_array( $provisionerKey, $this->contentProvisionerSkip ) ) {
+				$this->logger->debug( "Content provisioner \"$provisionerKey\" - skipped..." );
+				continue;
+			}
 
 			if ( is_callable( $contentProvisionerData ) ) {
 				$contentProvisionerSpecs['factory'] = $contentProvisionerData;

@@ -111,3 +111,36 @@ By default, custom manifest file, which will be processed by custom content prov
 }
 ```
 Here "ManifestsKey" must be the same value which was passed to that content provisioner as first argument.
+
+## Skip content provisioners
+
+If some of content provisioners needs to be disabled, it can be done with ``$mwsgContentProvisionerSkip`` global.
+Let's assume that there is some custom content provisioner which is registered that way:
+```json
+{
+	"attributes": {
+		"MWStakeContentProvisioner": {
+			"ContentProvisioners": {
+				"ArbitraryContentProvisionerKey": {
+					"class": "\\MediaWiki\\Path\\To\\ArbitraryProvisioner",
+					"args": [
+						"ManifestsKey"
+					],
+					"services": [
+						"ArbitraryService",
+						"SomeOtherService"
+					]
+				}
+			}
+		}
+	}
+}
+```
+Then it can be disabled in that way:
+```php
+$mwsgContentProvisionerSkip[] = 'ArbitraryContentProvisionerKey';
+```
+If there is a need to disable default content provisioner, it looks similar:
+```php
+$mwsgContentProvisionerSkip[] = 'DefaultContentProvisioner';
+```

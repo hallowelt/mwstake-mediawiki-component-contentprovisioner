@@ -24,7 +24,8 @@ class ProvisionContents extends LoggedUpdateMaintenance {
 
 		$contentProvisionerPipeline = new ContentProvisionerPipeline(
 			$objectFactory,
-			$contentProvisionerRegistry
+			$contentProvisionerRegistry,
+			$GLOBALS['mwsgContentProvisionerSkip']
 		);
 		$contentProvisionerPipeline->setLogger( LoggerFactory::getInstance( 'ContentProvisioner' ) );
 		$contentProvisionerPipeline->setOutput( new PrintOutput() );
