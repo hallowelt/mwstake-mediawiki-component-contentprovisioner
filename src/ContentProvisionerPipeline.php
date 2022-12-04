@@ -50,7 +50,7 @@ class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInt
 	public function __construct(
 		ObjectFactory $objectFactory,
 		IContentProvisionerRegistry $contentProvisionerRegistry,
-		array $contentProvisionerSkip
+		array $contentProvisionerSkip = []
 	) {
 		$this->logger = new NullLogger();
 		$this->output = new NullOutput();
