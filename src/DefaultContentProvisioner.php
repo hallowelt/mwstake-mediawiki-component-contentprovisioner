@@ -19,7 +19,6 @@ use TextContent;
 use Title;
 use TitleFactory;
 use User;
-use WikiPage;
 
 class DefaultContentProvisioner implements
 				LoggerAwareInterface,

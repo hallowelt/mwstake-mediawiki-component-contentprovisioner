@@ -8,7 +8,6 @@ use MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner;
 use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
 use TextContent;
 use Title;
-use WikiPage;
 
 /**
  * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner
