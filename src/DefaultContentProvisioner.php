@@ -105,7 +105,7 @@ class DefaultContentProvisioner implements
 		$this->logger = new NullLogger();
 		$this->output = new NullOutput();
 
-		$this->maintenanceUser = User::newSystemUser( 'Mediawiki default' );
+		$this->maintenanceUser = User::newSystemUser( 'MediaWiki default' );
 
 		$this->manifestsKey = $manifestsKey;
 		$this->wikiLang = $wikiLang;
