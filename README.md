@@ -7,7 +7,13 @@ Provides a mechanism which allows to import some arbitrary information during "m
 
 ## Usage in MediaWiki extension
 
-Add `"mwstake/mediawiki-component-contentprovisioner": "~1.0"` to the `require` section of your `composer.json` file.
+**MediaWiki 1.35**
+
+- Add `"mwstake/mediawiki-component-contentprovisioner": "~1"` to the `require` section of your `composer.json` file.
+
+**MediaWiki 1.39**
+
+- Add `"mwstake/mediawiki-component-contentprovisioner": "~2"` to the `require` section of your `composer.json` file.
 
 Explicit initialization is required. This can be achieved by
 - either adding `"callback": "mwsInitComponents"` to your `extension.json`/`skin.json`

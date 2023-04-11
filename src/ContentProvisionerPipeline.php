@@ -70,8 +70,7 @@ class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInt
 				'services' => [
 					'ContentLanguage',
 					'LanguageFallback',
-					'TitleFactory',
-					'WikiPageFactory',
+					'TitleFactory'
 				]
 			];
 

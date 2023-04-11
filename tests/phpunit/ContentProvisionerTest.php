@@ -8,6 +8,7 @@ use MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner;
 use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
 use TextContent;
 use Title;
+use WikiPage;
 
 /**
  * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner
@@ -151,13 +152,11 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 		$wikiLang = $services->getLanguageFactory()->getLanguage( $importLangCode );
 		$fallbackLanguage = $services->getLanguageFallback();
 		$titleFactory = $services->getTitleFactory();
-		$wikipageFactory = $services->getWikiPageFactory();
 
 		$contentProvisioner = new DefaultContentProvisioner(
 			$wikiLang,
 			$fallbackLanguage,
 			$titleFactory,
-			$wikipageFactory,
 			'ManifestsKey'
 		);
 		$contentProvisioner->setManifestListProvider( $manifestListProviderMock );
@@ -266,7 +265,7 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * 		or empty string if content was not recognized
 	 */
 	private function getPageContent( Title $title ): string {
-		$wikiPage = $this->getServiceContainer()->getWikiPageFactory()->newFromTitle( $title );
+		$wikiPage = WikiPage::factory( $title );
 
 		$updater = $wikiPage->newPageUpdater( $this->getTestSysop()->getUser() );
 
