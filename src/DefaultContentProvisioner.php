@@ -304,6 +304,10 @@ class DefaultContentProvisioner implements
 		$updater = $wikiPage->newPageUpdater( $this->maintenanceUser );
 
 		$parentRevision = $updater->grabParentRevision();
+		if ( $parentRevision === null ) {
+			return '';
+		}
+
 		$content = $parentRevision->getContent( SlotRecord::MAIN );
 		if ( $content instanceof TextContent ) {
 			$text = $content->getText();
