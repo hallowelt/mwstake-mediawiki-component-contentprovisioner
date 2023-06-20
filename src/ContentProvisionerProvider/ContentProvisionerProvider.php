@@ -5,6 +5,11 @@ namespace MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerProvi
 use MWStake\MediaWiki\Component\ContentProvisioner\AttributeProvider;
 use MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisionerProvider;
 
+/**
+ * That manifest list provider is used to obtain content provisioners from certain "extension.json" attribute.
+ *
+ * Attribute name can be overridden in subclasses, if needed.
+ */
 class ContentProvisionerProvider extends AttributeProvider implements IContentProvisionerProvider {
 
 	/**
@@ -12,7 +17,7 @@ class ContentProvisionerProvider extends AttributeProvider implements IContentPr
 	 *
 	 * @var string
 	 */
-	private $attributeName = 'ContentProvisioners';
+	protected $attributeName = 'ContentProvisioners';
 
 	/**
 	 * @inheritDoc

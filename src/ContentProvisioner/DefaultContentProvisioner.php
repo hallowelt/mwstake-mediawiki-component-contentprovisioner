@@ -1,6 +1,6 @@
 <?php
 
-namespace MWStake\MediaWiki\Component\ContentProvisioner;
+namespace MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner;
 
 use CommentStoreComment;
 use Language;
@@ -10,7 +10,13 @@ use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MWContentSerializationException;
 use MWException;
+use MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisioner;
+use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
+use MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage;
 use MWStake\MediaWiki\Component\ContentProvisioner\Output\NullOutput;
+use MWStake\MediaWiki\Component\ContentProvisioner\OutputAwareInterface;
+use MWStake\MediaWiki\Component\ContentProvisioner\OutputInterface;
+use MWStake\MediaWiki\Component\ContentProvisioner\UpdateLogStorageTrait;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -25,6 +31,7 @@ class DefaultContentProvisioner implements
 				OutputAwareInterface,
 				IContentProvisioner
 {
+	use UpdateLogStorageTrait;
 
 	/**
 	 * Logger object
@@ -215,10 +222,23 @@ class DefaultContentProvisioner implements
 			$title = $this->titleFactory->newFromText( $targetTitle, NS_MAIN );
 			$pageContentPath = dirname( $manifestPath ) . $pageData['content_path'];
 
+			$prefixedDbKey = $title->getPrefixedDBkey();
+
 			if ( !$title->exists( Title::READ_LATEST ) ) {
-				$this->output->write( "...Creating page '{$title->getPrefixedDBkey()}'...\n" );
+				$this->output->write( "...Creating page '$prefixedDbKey'...\n" );
+
+				$entityKey = 'DefaultContentProvisioner:' . $prefixedDbKey;
+
+				// This title was already imported, but does not exist now.
+				// It should have been removed by user, so no need to import it again
+				if ( $this->entityExists( $entityKey ) ) {
+					continue;
+				}
 
 				$this->importWikiContent( $title, $pageContentPath );
+
+				// Save entry in database
+				$this->upsertEntity( $entityKey );
 			} else {
 				$currentHash = $this->getContentHash( $title );
 
@@ -246,9 +266,13 @@ class DefaultContentProvisioner implements
 					if ( !$changedByUser ) {
 						// Page content is just outdated, so update it
 						$this->output->write( "Wiki page already exists, but it has outdated content.\n" );
-						$this->output->write( "...Updating page '{$title->getPrefixedDBkey()}'...\n" );
+						$this->output->write( "...Updating page '$prefixedDbKey'...\n" );
 
 						$this->importWikiContent( $title, $pageContentPath );
+
+						// Update entry in database
+						$entityKey = 'DefaultContentProvisioner:' . $prefixedDbKey;
+						$this->upsertEntity( $entityKey );
 					} else {
 						// User did some changes to the page, do nothing for now
 						$this->output->write( "Wiki page already exists, but it was changed by user! Skipping...\n" );

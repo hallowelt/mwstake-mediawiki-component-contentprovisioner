@@ -6,8 +6,8 @@ interface IManifestListProvider {
 
 	/**
 	 * Returns list of manifest files which should be processed by specific content provisioner.
-	 * Each manifest describes list of wiki pages (with some metadata) to be imported into wiki.
-	 * These manifests are used during wiki update or installation to import some content into wiki.
+	 * Each manifest describes list of wiki pages (or any other entities) to be imported into the wiki.
+	 * These manifests are used during wiki update or installation to import arbitrary content into the wiki.
 	 *
 	 * @param string $manifestsKey Key to recognize manifests needed
 	 *
