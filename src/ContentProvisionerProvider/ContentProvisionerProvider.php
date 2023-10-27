@@ -6,7 +6,8 @@ use MWStake\MediaWiki\Component\ContentProvisioner\AttributeProvider;
 use MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisionerProvider;
 
 /**
- * That manifest list provider is used to obtain content provisioners from certain "extension.json" attribute.
+ * That manifest list provider is used to obtain
+ * content provisioners from certain "extension.json" attribute.
  *
  * Attribute name can be overridden in subclasses, if needed.
  */

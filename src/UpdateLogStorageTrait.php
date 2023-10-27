@@ -3,7 +3,6 @@
 namespace MWStake\MediaWiki\Component\ContentProvisioner;
 
 use MediaWiki\MediaWikiServices;
-use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Used in cases when we need to store information about imported entities in the "updatelog" table.

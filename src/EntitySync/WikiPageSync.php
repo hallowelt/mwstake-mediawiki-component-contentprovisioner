@@ -122,7 +122,8 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 			$pagesList = json_decode( file_get_contents( $absoluteManifestPath ), true );
 
 			foreach ( $pagesList as $prefixedDbKey => $pageData ) {
-				$pages[$prefixedDbKey]['contentPath'] = dirname( $absoluteManifestPath ) . $pageData['content_path'];
+				$pages[$prefixedDbKey]['contentPath'] = dirname( $absoluteManifestPath )
+					. $pageData['content_path'];
 				$pages[$prefixedDbKey]['targetTitle'] = $pageData['target_title'];
 			}
 		}

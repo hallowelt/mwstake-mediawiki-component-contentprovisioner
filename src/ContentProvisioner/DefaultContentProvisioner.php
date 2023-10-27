@@ -27,9 +27,9 @@ use TitleFactory;
 use User;
 
 class DefaultContentProvisioner implements
-	LoggerAwareInterface,
-	OutputAwareInterface,
-	IContentProvisioner
+				LoggerAwareInterface,
+				OutputAwareInterface,
+				IContentProvisioner
 {
 	use UpdateLogStorageTrait;
 

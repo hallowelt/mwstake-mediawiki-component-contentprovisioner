@@ -14,5 +14,6 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 		'\\MWStake\\MediaWiki\\Component\\ContentProvisioner\\'
 		. 'MediaWiki\\Hook\\LoadExtensionSchemaUpdates\\RunUpdate::callback';
 
-	$GLOBALS['wgServiceWiringFiles'][] = $GLOBALS['IP'] . '/vendor/mwstake/mediawiki-component-contentprovisioner/includes/ServiceWiring.php';
+	$GLOBALS['wgServiceWiringFiles'][] = $GLOBALS['IP']
+		. '/vendor/mwstake/mediawiki-component-contentprovisioner/includes/ServiceWiring.php';
 } );
