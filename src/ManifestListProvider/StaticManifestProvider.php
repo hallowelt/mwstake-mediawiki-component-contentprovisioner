@@ -5,6 +5,11 @@ namespace MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider;
 use MWStake\MediaWiki\Component\ContentProvisioner\AttributeProvider;
 use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
 
+/**
+ * That manifest list provider is used to obtain manifests from certain "extension.json" attribute.
+ *
+ * Attribute name can be overridden in subclasses, if needed.
+ */
 class StaticManifestProvider extends AttributeProvider implements IManifestListProvider {
 
 	/**
@@ -12,7 +17,7 @@ class StaticManifestProvider extends AttributeProvider implements IManifestListP
 	 *
 	 * @var string
 	 */
-	private $attributeName = 'ContentManifests';
+	protected $attributeName = 'ContentManifests';
 
 	/**
 	 * @inheritDoc
@@ -37,8 +42,10 @@ class StaticManifestProvider extends AttributeProvider implements IManifestListP
 	}
 
 	/**
-	 * @param array $allManifests
+	 * When gathering manifests from "extension.json" attributes, they may be some duplicates.
+	 * They are not needed further.
 	 *
+	 * @param array $allManifests
 	 * @return array
 	 */
 	private function removeDuplicates( array $allManifests ): array {
@@ -51,7 +58,6 @@ class StaticManifestProvider extends AttributeProvider implements IManifestListP
 
 	/**
 	 * @param array $allManifests
-	 *
 	 * @return array
 	 */
 	private function expandPaths( array $allManifests ): array {

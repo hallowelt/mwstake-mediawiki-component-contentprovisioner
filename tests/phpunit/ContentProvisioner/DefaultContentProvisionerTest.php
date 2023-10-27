@@ -1,19 +1,19 @@
 <?php
 
-namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests;
+namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests\ContentProvisioner;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
-use MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner;
+use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner;
 use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
 use TextContent;
 use Title;
 
 /**
- * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner
+ * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner
  * @group Database
  */
-class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
+class DefaultContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 
 	/**
 	 * @inheritDoc
@@ -32,7 +32,7 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * Covers case with regular import of English wiki pages.
 	 * No special cases here.
 	 *
-	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner::provision()
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner::provision()
 	 */
 	public function testRegularEnglish() {
 		$manifestList = [
@@ -49,7 +49,7 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * Covers case with regular import of German wiki pages.
 	 * No special cases here.
 	 *
-	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner::provision()
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner::provision()
 	 */
 	public function testRegularGerman() {
 		$manifestList = [
@@ -68,7 +68,7 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * "sha1" hash of page content matches one of old "sha1" hashes, saved in manifest.
 	 * It means that this page is just outdated, so its newer version will be imported.
 	 *
-	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner::provision()
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner::provision()
 	 */
 	public function testPageOutdated() {
 		$manifestList = [
@@ -87,7 +87,7 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * It means that this page was created/changed by user.
 	 * Content provisioner will do nothing in that case.
 	 *
-	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\DefaultContentProvisioner::provision()
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner::provision()
 	 */
 	public function testPageChangedByUser() {
 		$manifestList = [
@@ -134,7 +134,7 @@ class ContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * 		Pass <tt>false</tt> if some custom or more complex checks should be done,
 	 * 		outside of this method.
 	 *		In such case content provisioner will just do regular import, no pages checks will be done.
-	 * 		Example: {@link ContentProvisionerTest::testPageChangedByUser()}
+	 * 		Example: {@link DefaultContentProvisionerTest::testPageChangedByUser()}
 	 */
 	private function performTest(
 		array $manifestList,

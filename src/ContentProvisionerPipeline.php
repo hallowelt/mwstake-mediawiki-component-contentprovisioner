@@ -3,6 +3,7 @@
 namespace MWStake\MediaWiki\Component\ContentProvisioner;
 
 use Exception;
+use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner;
 use MWStake\MediaWiki\Component\ContentProvisioner\Output\NullOutput;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
@@ -23,11 +24,17 @@ class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInt
 	private $contentProvisionerRegistry;
 
 	/**
+	 * Injected array containing content provisioners which SHOULD NOT be executed.
+	 * Just list of content provisioners keys.
+	 *
 	 * @var array
 	 */
 	private $contentProvisionerSkip;
 
 	/**
+	 * List of content provisioners to execute.
+	 * Content provisioners from {@link self::$contentProvisionerSkip} will not go into that array.
+	 *
 	 * @var IContentProvisioner[]
 	 */
 	private $contentProvisioners = [];
@@ -45,7 +52,8 @@ class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInt
 	/**
 	 * @param ObjectFactory $objectFactory
 	 * @param IContentProvisionerRegistry $contentProvisionerRegistry
-	 * @param array $contentProvisionerSkip
+	 * @param string[] $contentProvisionerSkip Content provisioners to skip. Just list of keys.
+	 * 		{@link self::$contentProvisionerSkip}
 	 */
 	public function __construct(
 		ObjectFactory $objectFactory,
@@ -131,13 +139,15 @@ class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInt
 
 	/**
 	 * Goes through content provisioners' registry, creates and stores instance for each of them
+	 *
+	 * @see ContentProvisionerPipeline::$contentProvisioners
 	 */
 	private function collectContentProvisioners(): void {
-		$contentProvisioners = $this->contentProvisionerRegistry->getProvisioners();
+		$contentProvisionersList = $this->contentProvisionerRegistry->getProvisioners();
 
 		$manifestListProvider = $this->contentProvisionerRegistry->getManifestListProvider();
 
-		foreach ( $contentProvisioners as $provisionerKey => $contentProvisionerData ) {
+		foreach ( $contentProvisionersList as $provisionerKey => $contentProvisionerData ) {
 			$contentProvisionerSpecs = [];
 
 			if ( in_array( $provisionerKey, $this->contentProvisionerSkip ) ) {
