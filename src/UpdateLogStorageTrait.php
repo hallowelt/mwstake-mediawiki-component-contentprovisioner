@@ -19,7 +19,7 @@ trait UpdateLogStorageTrait {
 	 * @param string $entityKey
 	 * @return bool
 	 */
-	private function entityExists( string $entityKey ): bool {
+	private function entityWasSynced( string $entityKey ): bool {
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$exists = $db->selectField(
 			'updatelog',
@@ -37,17 +37,24 @@ trait UpdateLogStorageTrait {
 	 * If entity does not exist - it is added with current timestamp.
 	 *
 	 * @param string $entityKey
+	 * @param array $entityData Some arbitrary data which can be stored in "updatelog.ul_value".
+	 * 		By default - latest entity sync timestamp, under "timestamp" key.
 	 * @return void
 	 * @see IDatabase::upsert()
 	 */
-	private function upsertEntity( string $entityKey ): void {
+	private function upsertEntitySyncRecord( string $entityKey, array $entityData = [] ): void {
 		$row = [
-			'ul_key' => $entityKey,
-			'ul_value' => wfTimestampNow()
+			'ul_key' => $entityKey
 		];
 
-		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
-		$db->upsert(
+		if ( !$entityData ) {
+			$entityData['timestamp'] = wfTimestampNow();
+		}
+
+		$row['ul_value'] = json_encode( $entityData );
+
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
+		$dbw->upsert(
 			'updatelog',
 			$row,
 			'ul_key',
@@ -56,12 +63,16 @@ trait UpdateLogStorageTrait {
 	}
 
 	/**
+	 * Gets some entity arbitrary data, which can be stored in "updatelog.ul_value".
+	 * Data stored there must be JSON encoded.
+	 * By default - there is the latest entity sync timestamp, under "timestamp" array key.
+	 *
 	 * @param string $entityKey
-	 * @return string
+	 * @return array
 	 */
-	private function getTimestamp( string $entityKey ): string {
-		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
-		$timestamp = $db->selectField(
+	private function getEntitySyncData( string $entityKey ): array {
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
+		$entityDataRaw = $dbr->selectField(
 			'updatelog',
 			'ul_value',
 			[
@@ -69,6 +80,8 @@ trait UpdateLogStorageTrait {
 			]
 		);
 
-		return $timestamp;
+		$entityData = json_decode( $entityDataRaw, true );
+
+		return $entityData;
 	}
 }
