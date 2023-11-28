@@ -130,7 +130,7 @@ class DefaultContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 	 * @param array $manifestList List with paths of manifests, which are used for import
 	 * @param string $importLangCode Code of language, on which import is done.
 	 * 		Pages on languages different from specified - should not be imported.
-	 * @param boolean $check If we need to check imported pages inside of this method.
+	 * @param bool $check If we need to check imported pages inside of this method.
 	 * 		Pass <tt>false</tt> if some custom or more complex checks should be done,
 	 * 		outside of this method.
 	 *		In such case content provisioner will just do regular import, no pages checks will be done.

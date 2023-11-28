@@ -10,6 +10,7 @@ use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MWContentSerializationException;
 use MWException;
+use MWStake\MediaWiki\Component\ContentProvisioner\EntityKey;
 use MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisioner;
 use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
 use MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage;
@@ -27,9 +28,9 @@ use TitleFactory;
 use User;
 
 class DefaultContentProvisioner implements
-				LoggerAwareInterface,
-				OutputAwareInterface,
-				IContentProvisioner
+	LoggerAwareInterface,
+	OutputAwareInterface,
+	IContentProvisioner
 {
 	use UpdateLogStorageTrait;
 
@@ -220,11 +221,12 @@ class DefaultContentProvisioner implements
 			if ( !$title->exists( Title::READ_LATEST ) ) {
 				$this->output->write( "...Creating page '$prefixedDbKey'...\n" );
 
-				$entityKey = $this->makeEntityKey( $prefixedDbKey );
+				$entityKey = new EntityKey( 'DefaultContentProvisioner', $prefixedDbKey );
 
 				// This title was already imported, but does not exist now.
 				// It should have been removed by user, so no need to import it again
 				if ( $this->entityWasSynced( $entityKey ) ) {
+					$this->output->write( "Wiki page was synced, but at some point removed by user. Skipping...\n" );
 					continue;
 				}
 
@@ -263,7 +265,7 @@ class DefaultContentProvisioner implements
 
 						$this->importWikiContent( $title, $pageContentPath );
 
-						$entityKey = $this->makeEntityKey( $prefixedDbKey );
+						$entityKey = new EntityKey( 'DefaultContentProvisioner', $prefixedDbKey );
 
 						// Update entry in database
 						$this->upsertEntitySyncRecord( $entityKey );
@@ -333,18 +335,5 @@ class DefaultContentProvisioner implements
 		}
 
 		return '';
-	}
-
-	/**
-	 * Makes entity key from title prefixed DB key.
-	 * That entity key is used to find entity sync records, for example.
-	 *
-	 * @param string $prefixedDbKey
-	 * @return string
-	 */
-	private function makeEntityKey( string $prefixedDbKey ): string {
-		$entityKey = 'DefaultContentProvisioner:' . $prefixedDbKey;
-
-		return $entityKey;
 	}
 }
