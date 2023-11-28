@@ -11,7 +11,7 @@ return [
 			$services->getWikiPageFactory()
 		);
 
-		$wikiPageSync->setLogger( LoggerFactory::getInstance( 'ContentProvisioner' ) );
+		$wikiPageSync->setLogger( LoggerFactory::getInstance( 'ContentProvisioner_Sync' ) );
 
 		return $wikiPageSync;
 	}

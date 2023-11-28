@@ -36,7 +36,7 @@ class FileBasedRegistry implements IContentProvisionerRegistry {
 	/**
 	 * @inheritDoc
 	 */
-	public function getManifestListProvider() : IManifestListProvider {
+	public function getManifestListProvider(): IManifestListProvider {
 		return $this->manifestListProvider;
 	}
 

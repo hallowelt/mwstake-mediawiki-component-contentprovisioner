@@ -2,24 +2,27 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner;
 
+use MWStake\MediaWiki\Component\ContentProvisioner\EntitySync\WikiPageSync;
 use Status;
 
 /**
  * Base class for entities synchronization.
  *
- * @see \MWStake\MediaWiki\Component\ContentProvisioner\EntitySync\WikiPageSync
+ * @see WikiPageSync
  */
 abstract class EntitySync {
 	use UpdateLogStorageTrait;
 
 	/**
-	 * @param string $entityKey
+	 * @param string $entryKey
 	 * @param array $entityData
 	 * @return Status
 	 */
-	public function sync( string $entityKey, array $entityData = [] ): Status {
-		$status = $this->doSync( $entityKey );
-		$this->upsertEntitySyncRecord( $entityKey, $entityData );
+	public function sync( string $entryKey, array $entityData = [] ): Status {
+		$status = $this->doSync( $entryKey );
+
+		$entityKey = new EntityKey( $this->getProvisionerKey(), $entryKey );
+		$this->upsertEntitySyncRecord( (string)$entityKey, $entityData );
 
 		return $status;
 	}
@@ -31,4 +34,13 @@ abstract class EntitySync {
 	 * @return Status
 	 */
 	abstract protected function doSync( string $entityKey ): Status;
+
+	/**
+	 * Get key of content provisioner, associated with entity which should be synced.
+	 * For example, in case with {@link WikiPageSync} it will be "DefaultContentProvisioner".
+	 *
+	 * @return string
+	 * @see EntityKey::$provisionerKey
+	 */
+	abstract protected function getProvisionerKey(): string;
 }

@@ -84,14 +84,19 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 	/**
 	 * @inheritDoc
 	 */
-	protected function doSync( string $entityKey ): Status {
+	protected function getProvisionerKey(): string {
+		return 'DefaultContentProvisioner';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function doSync( string $dbPrefixedKey ): Status {
 		$status = Status::newGood();
 
 		if ( !$this->wikiPagesCollected ) {
 			$this->collectWikiPages();
 		}
-
-		list( $provisionerKey, $dbPrefixedKey ) = explode( ':', $entityKey );
 
 		if ( !$this->wikiPages[$dbPrefixedKey] ) {
 			return $status->error( 'No content was found in any of manifests' );
@@ -100,8 +105,12 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 		$title = $this->titleFactory->newFromText( $this->wikiPages[$dbPrefixedKey]['targetTitle'] );
 		$pageContentPath = $this->wikiPages[$dbPrefixedKey]['contentPath'];
 
-		if ( !$this->importWikiContent( $title, $pageContentPath ) ) {
-			$status->error( 'Import failed' );
+		try {
+			if ( !$this->importWikiContent( $title, $pageContentPath ) ) {
+				$status->error( 'Import failed' );
+			}
+		} catch ( MWException | MWContentSerializationException $e ) {
+			$this->logger->error( $e->getMessage() );
 		}
 
 		return $status;
