@@ -8,7 +8,9 @@ return [
 	'ContentProvisionerWikiPageSync' => static function ( MediaWikiServices $services ) {
 		$wikiPageSync = new WikiPageSync(
 			$services->getTitleFactory(),
-			$services->getWikiPageFactory()
+			$services->getWikiPageFactory(),
+			$services->getContentLanguage(),
+			$services->getLanguageFallback()
 		);
 
 		$wikiPageSync->setLogger( LoggerFactory::getInstance( 'ContentProvisioner_Sync' ) );

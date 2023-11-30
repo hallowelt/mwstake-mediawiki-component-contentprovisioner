@@ -4,12 +4,15 @@ namespace MWStake\MediaWiki\Component\ContentProvisioner\EntitySync;
 
 use CommentStoreComment;
 use ExtensionRegistry;
+use Language;
+use MediaWiki\Languages\LanguageFallback;
 use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MWContentSerializationException;
 use MWException;
 use MWStake\MediaWiki\Component\ContentProvisioner\EntitySync;
+use MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage;
 use MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\StaticManifestProvider;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
@@ -59,18 +62,34 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 	private $titleFactory;
 
 	/**
+	 * @var Language
+	 */
+	private $wikiLang;
+
+	/**
+	 * @var LanguageFallback
+	 */
+	private $languageFallback;
+
+	/**
 	 * @param TitleFactory $titleFactory
 	 * @param WikiPageFactory $wikiPageFactory
+	 * @param Language $wikiLang
+	 * @param LanguageFallback $languageFallback
 	 */
 	public function __construct(
 		TitleFactory $titleFactory,
-		WikiPageFactory $wikiPageFactory
+		WikiPageFactory $wikiPageFactory,
+		Language $wikiLang,
+		LanguageFallback $languageFallback
 	) {
 		$this->logger = new NullLogger();
 		$this->maintenanceUser = User::newSystemUser( 'MediaWiki default' );
 
 		$this->titleFactory = $titleFactory;
 		$this->wikiPageFactory = $wikiPageFactory;
+		$this->wikiLang = $wikiLang;
+		$this->languageFallback = $languageFallback;
 	}
 
 	/**
@@ -102,7 +121,7 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 			return $status->error( 'No content was found in any of manifests' );
 		}
 
-		$title = $this->titleFactory->newFromText( $this->wikiPages[$dbPrefixedKey]['targetTitle'] );
+		$title = $this->titleFactory->newFromText( $dbPrefixedKey );
 		$pageContentPath = $this->wikiPages[$dbPrefixedKey]['contentPath'];
 
 		try {
@@ -130,10 +149,25 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 		foreach ( $wikiPageManifests as $absoluteManifestPath ) {
 			$pagesList = json_decode( file_get_contents( $absoluteManifestPath ), true );
 
-			foreach ( $pagesList as $prefixedDbKey => $pageData ) {
+			$availableLanguages = [];
+			foreach ( $pagesList as $titleKey => $pageData ) {
+				$availableLanguages[$pageData['lang']] = true;
+			}
+
+			$importLanguage = new ImportLanguage( $this->languageFallback, $this->wikiLang->getCode() );
+			$importLanguageCode = $importLanguage->getImportLanguage(
+				array_keys( $availableLanguages )
+			);
+
+			foreach ( $pagesList as $titleKey => $pageData ) {
+				if ( $pageData['lang'] !== $importLanguageCode ) {
+					continue;
+				}
+
+				$prefixedDbKey = $pageData['target_title'];
+
 				$pages[$prefixedDbKey]['contentPath'] = dirname( $absoluteManifestPath )
 					. $pageData['content_path'];
-				$pages[$prefixedDbKey]['targetTitle'] = $pageData['target_title'];
 			}
 		}
 
