@@ -34,6 +34,9 @@ class DefaultContentProvisioner implements
 {
 	use UpdateLogStorageTrait;
 
+	/** @var User */
+	private $maintenanceUser;
+
 	/**
 	 * Logger object
 	 *
