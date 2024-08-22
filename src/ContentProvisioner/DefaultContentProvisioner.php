@@ -3,6 +3,7 @@
 namespace MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner;
 
 use CommentStoreComment;
+use IDBAccessObject;
 use Language;
 use MediaWiki\Languages\LanguageFallback;
 use MediaWiki\Page\WikiPageFactory;
@@ -221,7 +222,7 @@ class DefaultContentProvisioner implements
 
 			$prefixedDbKey = $title->getPrefixedDBkey();
 
-			if ( !$title->exists( Title::READ_LATEST ) ) {
+			if ( !$title->exists( IDBAccessObject::READ_LATEST ) ) {
 				$this->output->write( "...Creating page '$prefixedDbKey'...\n" );
 
 				$entityKey = new EntityKey( 'DefaultContentProvisioner', $prefixedDbKey );
