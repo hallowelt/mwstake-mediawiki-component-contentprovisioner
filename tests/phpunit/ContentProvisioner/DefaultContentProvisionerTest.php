@@ -230,7 +230,8 @@ class DefaultContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 				[
 					'page_title' => $pageTitle,
 					'page_namespace' => $ns
-				]
+				],
+				__METHOD__
 			);
 
 			if ( $pageId ) {
