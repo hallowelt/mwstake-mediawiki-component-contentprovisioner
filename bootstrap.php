@@ -12,7 +12,7 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 ->register( 'contentprovisioner', static function () {
 	$GLOBALS['mwsgContentProvisionerSkip'] = [];
 
-	$GLOBALS['wgExtensionFunctions'][] = static function() {
+	$GLOBALS['wgExtensionFunctions'][] = static function () {
 		$hookContainer = \MediaWiki\MediaWikiServices::getInstance()->getHookContainer();
 		$hookContainer->register( 'LoadExtensionSchemaUpdates', [ RunUpdate::class, 'callback' ] );
 	};
