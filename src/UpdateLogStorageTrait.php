@@ -58,7 +58,8 @@ trait UpdateLogStorageTrait {
 			'updatelog',
 			$row,
 			'ul_key',
-			$row
+			$row,
+			__METHOD__
 		);
 	}
 
