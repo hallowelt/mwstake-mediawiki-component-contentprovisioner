@@ -3,12 +3,12 @@
 namespace MWStake\MediaWiki\Component\ContentProvisioner;
 
 use Exception;
+use MediaWiki\Status\Status;
 use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner;
 use MWStake\MediaWiki\Component\ContentProvisioner\Output\NullOutput;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Status;
 use Wikimedia\ObjectFactory\ObjectFactory;
 
 class ContentProvisionerPipeline implements LoggerAwareInterface, OutputAwareInterface {

@@ -2,7 +2,7 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner;
 
-use Status;
+use MediaWiki\Status\Status;
 
 interface IContentProvisioner {
 

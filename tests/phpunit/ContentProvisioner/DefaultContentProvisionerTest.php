@@ -2,18 +2,20 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests\ContentProvisioner;
 
+use BsNamespaceHelper;
+use MediaWiki\Content\TextContent;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Title\Title;
+use MediaWikiIntegrationTestCase;
 use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner;
 use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
-use TextContent;
-use Title;
 
 /**
  * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner
  * @group Database
  */
-class DefaultContentProvisionerTest extends \MediaWikiIntegrationTestCase {
+class DefaultContentProvisionerTest extends MediaWikiIntegrationTestCase {
 
 	/**
 	 * @inheritDoc
@@ -219,12 +221,12 @@ class DefaultContentProvisionerTest extends \MediaWikiIntegrationTestCase {
 
 			// Otherwise we need to get namespace index
 			if ( strpos( $title, ':' ) !== false ) {
-				list( $nsName, $pageTitle ) = explode( ':', $title );
+				[ $nsName, $pageTitle ] = explode( ':', $title );
 
-				$ns = \BsNamespaceHelper::getNamespaceIndex( $nsName );
+				$ns = BsNamespaceHelper::getNamespaceIndex( $nsName );
 			}
 
-			$pageId = $this->db->selectField(
+			$pageId = $this->getDb()->selectField(
 				'page',
 				'page_id',
 				[

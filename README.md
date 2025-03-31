@@ -5,15 +5,22 @@ Provides a mechanism which allows to import some arbitrary information during "m
 
 **This code is meant to be executed within the MediaWiki application context. No standalone usage is intended.**
 
+## Compatibility
+- `3.0.x` -> MediaWiki 1.43
+- `2.0.x` -> MediaWiki 1.39
+- `1.0.x` -> MediaWiki 1.35
+
 ## Usage in MediaWiki extension
 
-**MediaWiki 1.35**
+Require this component in the `composer.json` of your extension:
 
-- Add `"mwstake/mediawiki-component-contentprovisioner": "~1"` to the `require` section of your `composer.json` file.
-
-**MediaWiki 1.39**
-
-- Add `"mwstake/mediawiki-component-contentprovisioner": "~2"` to the `require` section of your `composer.json` file.
+```json
+{
+	"require": {
+		"mwstake/mediawiki-component-contentprovisioner": "~3"
+	}
+}
+```
 
 Explicit initialization is required. This can be achieved by
 - either adding `"callback": "mwsInitComponents"` to your `extension.json`/`skin.json`
