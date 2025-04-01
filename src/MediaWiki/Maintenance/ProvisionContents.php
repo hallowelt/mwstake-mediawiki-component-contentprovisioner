@@ -2,10 +2,10 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\MediaWiki\Maintenance;
 
-use ExtensionRegistry;
-use LoggedUpdateMaintenance;
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\Maintenance\LoggedUpdateMaintenance;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Registration\ExtensionRegistry;
 use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerPipeline;
 use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerRegistry\FileBasedRegistry;
 use MWStake\MediaWiki\Component\ContentProvisioner\Output\PrintOutput;

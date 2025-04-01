@@ -2,13 +2,17 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\EntitySync;
 
-use CommentStoreComment;
-use ExtensionRegistry;
-use Language;
+use MediaWiki\CommentStore\CommentStoreComment;
+use MediaWiki\Language\Language;
 use MediaWiki\Languages\LanguageFallback;
 use MediaWiki\Page\WikiPageFactory;
+use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFactory;
+use MediaWiki\User\User;
 use MWContentSerializationException;
 use MWException;
 use MWStake\MediaWiki\Component\ContentProvisioner\EntitySync;
@@ -17,10 +21,6 @@ use MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\StaticMa
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Status;
-use Title;
-use TitleFactory;
-use User;
 
 class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 

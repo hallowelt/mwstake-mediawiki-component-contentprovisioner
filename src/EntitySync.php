@@ -2,8 +2,8 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner;
 
+use MediaWiki\Status\Status;
 use MWStake\MediaWiki\Component\ContentProvisioner\EntitySync\WikiPageSync;
-use Status;
 
 /**
  * Base class for entities synchronization.

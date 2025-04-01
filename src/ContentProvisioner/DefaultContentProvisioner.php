@@ -2,13 +2,17 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner;
 
-use CommentStoreComment;
-use IDBAccessObject;
-use Language;
+use MediaWiki\CommentStore\CommentStoreComment;
+use MediaWiki\Content\TextContent;
+use MediaWiki\Language\Language;
 use MediaWiki\Languages\LanguageFallback;
 use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFactory;
+use MediaWiki\User\User;
 use MWContentSerializationException;
 use MWException;
 use MWStake\MediaWiki\Component\ContentProvisioner\EntityKey;
@@ -22,11 +26,7 @@ use MWStake\MediaWiki\Component\ContentProvisioner\UpdateLogStorageTrait;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Status;
-use TextContent;
-use Title;
-use TitleFactory;
-use User;
+use Wikimedia\Rdbms\IDBAccessObject;
 
 class DefaultContentProvisioner implements
 	LoggerAwareInterface,
