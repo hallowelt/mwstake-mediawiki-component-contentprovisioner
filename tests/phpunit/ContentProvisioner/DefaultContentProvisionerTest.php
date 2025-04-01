@@ -2,7 +2,6 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests\ContentProvisioner;
 
-use BsNamespaceHelper;
 use MediaWiki\Content\TextContent;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
@@ -213,6 +212,7 @@ class DefaultContentProvisionerTest extends MediaWikiIntegrationTestCase {
 	 */
 	private function checkImportedPages( array $expectedWikiPages ): void {
 		$importedPages = [];
+		$namespaceInfo = $this->getServiceContainer()->getNamespaceInfo();
 
 		foreach ( $expectedWikiPages as $title => $contentHash ) {
 			// If there is just name title - it's "Main" namespace
@@ -223,7 +223,7 @@ class DefaultContentProvisionerTest extends MediaWikiIntegrationTestCase {
 			if ( strpos( $title, ':' ) !== false ) {
 				[ $nsName, $pageTitle ] = explode( ':', $title );
 
-				$ns = BsNamespaceHelper::getNamespaceIndex( $nsName );
+				$ns = $namespaceInfo->getCanonicalIndex( strtolower( $nsName ) );
 			}
 
 			$pageId = $this->getDb()->selectField(
