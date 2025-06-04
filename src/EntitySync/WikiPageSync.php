@@ -14,10 +14,10 @@ use MediaWiki\Title\Title;
 use MediaWiki\Title\TitleFactory;
 use MediaWiki\User\User;
 use MWContentSerializationException;
-use MWException;
 use MWStake\MediaWiki\Component\ContentProvisioner\EntitySync;
 use MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage;
 use MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\StaticManifestProvider;
+use MWUnknownContentModelException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -128,7 +128,7 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 			if ( !$this->importWikiContent( $title, $pageContentPath ) ) {
 				$status->error( 'Import failed' );
 			}
-		} catch ( MWException | MWContentSerializationException $e ) {
+		} catch ( MWContentSerializationException | MWUnknownContentModelException $e ) {
 			$this->logger->error( $e->getMessage() );
 		}
 
@@ -181,8 +181,8 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 	 * @param Title $title Target title, which should be imported
 	 * @param string $contentPath Path to the page content. Usually retrieved from manifest file
 	 * @return bool <tt>true</tt> if success, <tt>false</tt> otherwise
-	 * @throws MWException
 	 * @throws MWContentSerializationException
+	 * @throws MWUnknownContentModelException
 	 */
 	private function importWikiContent( Title $title, string $contentPath ): bool {
 		$pageContent = file_get_contents( $contentPath );
