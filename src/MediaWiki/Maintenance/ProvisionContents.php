@@ -16,10 +16,12 @@ class ProvisionContents extends LoggedUpdateMaintenance {
 	 * @inheritDoc
 	 */
 	protected function doDBUpdates() {
+		if ( defined( 'MW_QUIBBLE_CI' ) ) {
+			return true;
+		}
+
 		$enabledExtensions = array_keys( ExtensionRegistry::getInstance()->getAllThings() );
-
 		$contentProvisionerRegistry = new FileBasedRegistry( $enabledExtensions, $GLOBALS['IP'] );
-
 		$objectFactory = MediaWikiServices::getInstance()->getObjectFactory();
 
 		$contentProvisionerPipeline = new ContentProvisionerPipeline(
