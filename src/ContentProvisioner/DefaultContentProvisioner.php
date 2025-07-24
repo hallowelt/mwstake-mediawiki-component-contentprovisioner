@@ -14,7 +14,6 @@ use MediaWiki\Title\Title;
 use MediaWiki\Title\TitleFactory;
 use MediaWiki\User\User;
 use MWContentSerializationException;
-use MWException;
 use MWStake\MediaWiki\Component\ContentProvisioner\EntityKey;
 use MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisioner;
 use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
@@ -23,6 +22,7 @@ use MWStake\MediaWiki\Component\ContentProvisioner\Output\NullOutput;
 use MWStake\MediaWiki\Component\ContentProvisioner\OutputAwareInterface;
 use MWStake\MediaWiki\Component\ContentProvisioner\OutputInterface;
 use MWStake\MediaWiki\Component\ContentProvisioner\UpdateLogStorageTrait;
+use MWUnknownContentModelException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -186,8 +186,8 @@ class DefaultContentProvisioner implements
 	 *
 	 * @param string $manifestPath
 	 * @return void
-	 * @throws MWException
 	 * @throws MWContentSerializationException
+	 * @throws MWUnknownContentModelException
 	 */
 	private function processManifestFile( string $manifestPath ): void {
 		$pagesList = json_decode( file_get_contents( $manifestPath ), true );
@@ -288,8 +288,8 @@ class DefaultContentProvisioner implements
 	 * @param Title $title Target title, which should be imported
 	 * @param string $contentPath Path to the page content. Usually retrieved from manifest file
 	 * @return bool <tt>true</tt> if success, <tt>false</tt> otherwise
-	 * @throws MWException
 	 * @throws MWContentSerializationException
+	 * @throws MWUnknownContentModelException
 	 */
 	private function importWikiContent( Title $title, string $contentPath ): bool {
 		$pageContent = file_get_contents( $contentPath );
