@@ -1,26 +1,47 @@
-name: basic-tests
+name: CI
 
-on: push
+on:
+  push:
+    branches: [ '**' ]
 
 jobs:
-  test:
+
+  php:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 8.1
           tools: composer:2
 
-      - name: Setting composer config to allow installing plugins
-        run: composer config --global allow-plugins.composer/installers true
+      - name: Validate composer.json
+        run: composer validate --strict
 
       - name: Install dependencies
         run: composer update
 
-      - name: Run check coding conventions
+      - name: Run tests
         run: composer test
 
+  node:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
