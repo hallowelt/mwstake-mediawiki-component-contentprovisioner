@@ -1,15 +1,14 @@
 <?php
 
-namespace MWStake\MediaWiki\Component\ContentProvisioner\Test\ContentProvisionerProvider;
+namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests\Unit\ContentProvisionerProvider;
 
-// phpcs:ignore Generic.Files.LineLength.TooLong
+use MediaWikiUnitTestCase;
 use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerProvider\ContentProvisionerProvider;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerProvider\ContentProvisionerProvider
  */
-class ContentProvisionerProviderTest extends TestCase {
+class ContentProvisionerProviderTest extends MediaWikiUnitTestCase {
 
 	/**
 	 * Get all registered content provisioners

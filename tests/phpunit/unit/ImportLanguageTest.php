@@ -1,15 +1,15 @@
 <?php
 
-namespace MWStake\MediaWiki\Component\ContentProvisioner\Test;
+namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests\Unit;
 
 use MediaWiki\Languages\LanguageFallback;
+use MediaWikiUnitTestCase;
 use MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage
  */
-class ImportLanguageTest extends TestCase {
+class ImportLanguageTest extends MediaWikiUnitTestCase {
 
 	/**
 	 * @return array

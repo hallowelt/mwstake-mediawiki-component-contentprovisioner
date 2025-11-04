@@ -1,6 +1,6 @@
 <?php
 
-namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests\ContentProvisioner;
+namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests\Integration\ContentProvisioner;
 
 use MediaWiki\Content\TextContent;
 use MediaWiki\MediaWikiServices;
