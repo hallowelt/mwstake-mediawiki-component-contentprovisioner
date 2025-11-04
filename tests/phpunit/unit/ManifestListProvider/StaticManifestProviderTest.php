@@ -1,14 +1,14 @@
 <?php
 
-namespace MWStake\MediaWiki\Component\ContentProvisioner\Test\ManifestListProvider;
+namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests\Unit\ManifestListProvider;
 
+use MediaWikiUnitTestCase;
 use MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\StaticManifestProvider;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\StaticManifestProvider
  */
-class StaticManifestProviderTest extends TestCase {
+class StaticManifestProviderTest extends MediaWikiUnitTestCase {
 
 	/**
 	 * Get manifests with specific manifests key

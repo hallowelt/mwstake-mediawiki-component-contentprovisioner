@@ -2,7 +2,6 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerRegistry;
 
-// phpcs:ignore Generic.Files.LineLength.TooLong
 use MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisionerProvider\ContentProvisionerProvider;
 use MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisionerProvider;
 use MWStake\MediaWiki\Component\ContentProvisioner\IContentProvisionerRegistry;
