@@ -47,7 +47,7 @@ class ProvisionContents extends LoggedUpdateMaintenance {
 	/**
 	 * @inheritDoc
 	 */
-	protected function updateSkippedMessage() {
+	public function updateSkippedMessage() {
 		return 'ContentProvisioner: No changes in manifests. Skipping...';
 	}
 
