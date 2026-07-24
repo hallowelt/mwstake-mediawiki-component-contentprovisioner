@@ -84,7 +84,7 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 		LanguageFallback $languageFallback
 	) {
 		$this->logger = new NullLogger();
-		$this->maintenanceUser = User::newSystemUser( 'MediaWiki default' );
+		$this->maintenanceUser = User::newSystemUser( User::MAINTENANCE_SCRIPT_USER, [ 'steal' => true ] );
 
 		$this->titleFactory = $titleFactory;
 		$this->wikiPageFactory = $wikiPageFactory;
