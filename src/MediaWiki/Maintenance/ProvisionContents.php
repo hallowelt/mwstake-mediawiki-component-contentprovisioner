@@ -52,7 +52,6 @@ class ProvisionContents extends LoggedUpdateMaintenance {
 	}
 
 	/**
-	 *
 	 * Concatenates content of all registered manifests and calculates its MD5 hash.
 	 * It is used to create dynamic "update key".
 	 * So update key will stay the same (so this script will be skipped) until some manifest changes.
