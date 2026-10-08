@@ -111,8 +111,8 @@ jobs:
         run: |
           REPO="${{ github.event.repository.name }}"
           PACKAGE="${REPO#mwstake-}"
-          composer config repositories.${REPO} '{"type":"path","url":"extensions/${REPO}","options":{"symlink": false}}'
-          composer require mwstake/${PACKAGE}:@dev
+          composer config repositories."$REPO" '{"type":"path","url":"extensions/'"$REPO"'","options":{"symlink":false}}'
+          composer require "mwstake/${PACKAGE}:@dev"
 
       - name: Install MediaWiki with SQLite
         working-directory: mediawiki
