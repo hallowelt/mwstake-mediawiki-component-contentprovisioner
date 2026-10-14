@@ -7,7 +7,6 @@ use MediaWiki\Language\Language;
 use MediaWiki\Languages\LanguageFallback;
 use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Registration\ExtensionRegistry;
-use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Status\Status;
 use MediaWiki\Title\Title;
@@ -180,15 +179,14 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 	 *
 	 * @param Title $title Target title, which should be imported
 	 * @param string $contentPath Path to the page content. Usually retrieved from manifest file
-	 * @return bool <tt>true</tt> if success, <tt>false</tt> otherwise
+	 * @return Status
 	 * @throws MWContentSerializationException
 	 * @throws MWUnknownContentModelException
 	 */
-	private function importWikiContent( Title $title, string $contentPath ): bool {
+	private function importWikiContent( Title $title, string $contentPath ): Status {
 		$pageContent = file_get_contents( $contentPath );
 		if ( !$pageContent ) {
-			$this->logger->error( "Page '{$title->getDBkey()}': failed to retrieve page content!" );
-			return false;
+			return Status::newFatal( 'Failed to retrieve page content!' );
 		}
 
 		$wikiPage = $this->wikiPageFactory->newFromTitle( $title );
@@ -198,12 +196,7 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 
 		$updater = $wikiPage->newPageUpdater( $this->maintenanceUser );
 		$updater->setContent( SlotRecord::MAIN, $content );
-		$newRevision = $updater->saveRevision( $comment );
-		if ( $newRevision instanceof RevisionRecord ) {
-			return true;
-		} else {
-			$this->logger->error( "Page '{$title->getDBkey()}': failed to create page!" );
-			return false;
-		}
+		$updater->saveRevision( $comment );
+		return $updater->getStatus();
 	}
 }
