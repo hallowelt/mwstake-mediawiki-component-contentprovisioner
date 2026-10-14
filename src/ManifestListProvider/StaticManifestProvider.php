@@ -2,6 +2,7 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider;
 
+use MediaWiki\MediaWikiServices;
 use MWStake\MediaWiki\Component\ContentProvisioner\AttributeProvider;
 use MWStake\MediaWiki\Component\ContentProvisioner\IManifestListProvider;
 
@@ -24,6 +25,10 @@ class StaticManifestProvider extends AttributeProvider implements IManifestListP
 	 */
 	public function provideManifests( string $manifestsKey = '' ): array {
 		$allManifests = $this->getAttribute( $this->attributeName );
+		MediaWikiServices::getInstance()->getHookContainer()->run(
+			'MWStakeContentProvisionerModifyManifestList',
+			[ &$allManifests, $manifestsKey ]
+		);
 
 		// Remove duplicates
 		$allManifests = $this->removeDuplicates( $allManifests );
