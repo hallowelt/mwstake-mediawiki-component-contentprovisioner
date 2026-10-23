@@ -4,6 +4,7 @@ namespace MWStake\MediaWiki\Component\ContentProvisioner\EntitySync;
 
 use MediaWiki\CommentStore\CommentStoreComment;
 use MediaWiki\Language\Language;
+use MediaWiki\Language\RawMessage;
 use MediaWiki\Languages\LanguageFallback;
 use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Registration\ExtensionRegistry;
@@ -110,28 +111,23 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 	 * @inheritDoc
 	 */
 	protected function doSync( string $dbPrefixedKey ): Status {
-		$status = Status::newGood();
-
 		if ( !$this->wikiPagesCollected ) {
 			$this->collectWikiPages();
 		}
 
 		if ( !$this->wikiPages[$dbPrefixedKey] ) {
-			return $status->error( 'No content was found in any of manifests' );
+			return Status::newFatal( new RawMessage( 'No content was found in any of manifests' ) );
 		}
 
 		$title = $this->titleFactory->newFromText( $dbPrefixedKey );
 		$pageContentPath = $this->wikiPages[$dbPrefixedKey]['contentPath'];
 
 		try {
-			if ( !$this->importWikiContent( $title, $pageContentPath ) ) {
-				$status->error( 'Import failed' );
-			}
+			return $this->importWikiContent( $title, $pageContentPath );
 		} catch ( MWContentSerializationException | MWUnknownContentModelException $e ) {
 			$this->logger->error( $e->getMessage() );
+			return Status::newFatal( $e->getMessage() );
 		}
-
-		return $status;
 	}
 
 	/**
@@ -186,7 +182,7 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 	private function importWikiContent( Title $title, string $contentPath ): Status {
 		$pageContent = file_get_contents( $contentPath );
 		if ( !$pageContent ) {
-			return Status::newFatal( 'Failed to retrieve page content!' );
+			return Status::newFatal( new RawMessage( 'Failed to retrieve page content!' ) );
 		}
 
 		$wikiPage = $this->wikiPageFactory->newFromTitle( $title );
