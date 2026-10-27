@@ -17,6 +17,7 @@ use MWContentSerializationException;
 use MWStake\MediaWiki\Component\ContentProvisioner\EntitySync;
 use MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage;
 use MWStake\MediaWiki\Component\ContentProvisioner\ManifestListProvider\StaticManifestProvider;
+use MWStake\MediaWiki\Component\ContentProvisioner\TargetTitleExclusion;
 use MWUnknownContentModelException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
@@ -115,7 +116,7 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 			$this->collectWikiPages();
 		}
 
-		if ( !$this->wikiPages[$dbPrefixedKey] ) {
+		if ( empty( $this->wikiPages[$dbPrefixedKey] ) ) {
 			return Status::newFatal( new RawMessage( 'No content was found in any of manifests' ) );
 		}
 
@@ -155,6 +156,10 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 			);
 
 			foreach ( $pagesList as $titleKey => $pageData ) {
+				if ( TargetTitleExclusion::isExcluded( $pageData['target_title'] ) ) {
+					continue;
+				}
+
 				if ( $pageData['lang'] !== $importLanguageCode ) {
 					continue;
 				}

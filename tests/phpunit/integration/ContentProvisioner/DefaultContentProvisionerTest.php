@@ -64,6 +64,37 @@ class DefaultContentProvisionerTest extends MediaWikiIntegrationTestCase {
 	}
 
 	/**
+	 * Covers excluding manifest entries by their target title.
+	 *
+	 * @covers \MWStake\MediaWiki\Component\ContentProvisioner\ContentProvisioner\DefaultContentProvisioner::provision()
+	 */
+	public function testExcludedTargetTitle() {
+		$manifestList = [
+			__DIR__ . '/data/wiki_root/extensions/ExtensionWithContent1/Content/Default/manifest.json'
+		];
+
+		$hadPreviousConfiguration = array_key_exists(
+			'mwsgContentProvisionerExcludedTargetTitles',
+			$GLOBALS
+		);
+		$previousConfiguration = $GLOBALS['mwsgContentProvisionerExcludedTargetTitles'] ?? null;
+		$GLOBALS['mwsgContentProvisionerExcludedTargetTitles'] = [ 'Template:Test_template_1' ];
+
+		try {
+			$this->performTest( $manifestList, 'en', false );
+		} finally {
+			if ( $hadPreviousConfiguration ) {
+				$GLOBALS['mwsgContentProvisionerExcludedTargetTitles'] = $previousConfiguration;
+			} else {
+				unset( $GLOBALS['mwsgContentProvisionerExcludedTargetTitles'] );
+			}
+		}
+
+		$this->assertFalse( Title::newFromText( 'Template:Test_template_1' )->exists() );
+		$this->assertTrue( Title::newFromText( 'Test_page_1' )->exists() );
+	}
+
+	/**
 	 * Covers case when wiki page which should be imported already exists.
 	 *
 	 * "sha1" hash of page content matches one of old "sha1" hashes, saved in manifest.

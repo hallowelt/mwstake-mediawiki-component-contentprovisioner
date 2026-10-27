@@ -21,6 +21,7 @@ use MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage;
 use MWStake\MediaWiki\Component\ContentProvisioner\Output\NullOutput;
 use MWStake\MediaWiki\Component\ContentProvisioner\OutputAwareInterface;
 use MWStake\MediaWiki\Component\ContentProvisioner\OutputInterface;
+use MWStake\MediaWiki\Component\ContentProvisioner\TargetTitleExclusion;
 use MWStake\MediaWiki\Component\ContentProvisioner\UpdateLogStorageTrait;
 use MWUnknownContentModelException;
 use Psr\Log\LoggerAwareInterface;
@@ -206,6 +207,12 @@ class DefaultContentProvisioner implements
 		foreach ( $pagesList as $pageTitle => $pageData ) {
 			$this->output->write( "... Processing page: $pageTitle\n" );
 
+			$targetTitle = $pageData['target_title'];
+			if ( TargetTitleExclusion::isExcluded( $targetTitle ) ) {
+				$this->output->write( "... Target title '$targetTitle' is excluded by configuration. Skipping...\n" );
+				continue;
+			}
+
 			if ( $pageData['lang'] !== $importLanguageCode ) {
 				$this->output->write( "... Wrong page language. Skipping...\n" );
 				continue;
@@ -216,7 +223,6 @@ class DefaultContentProvisioner implements
 				continue;
 			}
 
-			$targetTitle = $pageData['target_title'];
 			$title = $this->titleFactory->newFromText( $targetTitle, NS_MAIN );
 			$pageContentPath = dirname( $manifestPath ) . $pageData['content_path'];
 
