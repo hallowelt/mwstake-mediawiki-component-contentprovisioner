@@ -2,6 +2,7 @@
 
 namespace MWStake\MediaWiki\Component\ContentProvisioner\Tests\Unit;
 
+use MediaWiki\Language\LanguageFallbackMode;
 use MediaWiki\Languages\LanguageFallback;
 use MediaWikiUnitTestCase;
 use MWStake\MediaWiki\Component\ContentProvisioner\ImportLanguage;
@@ -30,16 +31,17 @@ class ImportLanguageTest extends MediaWikiUnitTestCase {
 	 * @dataProvider provideData
 	 */
 	public function testSuccess( $wikiContentLanguage, $expectedImportLanguage ) {
+		$mode = LanguageFallbackMode::MESSAGES;
 		$languageFallbackMock = $this->createMock( LanguageFallback::class );
 		$languageFallbackMock->method( 'getAll' )->willReturnMap(
 			[
-				[ 'en', 0, [ 'en' ] ],
-				[ 'de', 0, [ 'en' ] ],
-				[ 'de-formal', 0, [ 'de', 'en' ] ],
-				[ 'ru', 0, [ 'en' ] ],
-				[ 'pt', 0, [ 'pt-br', 'en' ] ],
-				[ 'gl', 0, [ 'pt', 'en' ] ],
-				[ 'unknown', 0, [ 'en' ] ],
+				[ 'en', $mode, [ 'en' ] ],
+				[ 'de', $mode, [ 'en' ] ],
+				[ 'de-formal', $mode, [ 'de', 'en' ] ],
+				[ 'ru', $mode, [ 'en' ] ],
+				[ 'pt', $mode, [ 'pt-br', 'en' ] ],
+				[ 'gl', $mode, [ 'pt', 'en' ] ],
+				[ 'unknown', $mode, [ 'en' ] ],
 			]
 		);
 
