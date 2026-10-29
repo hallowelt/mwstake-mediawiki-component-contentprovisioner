@@ -75,6 +75,18 @@ That content provisioner just imports corresponding wiki pages which are provide
 
 All registered files will be processed during next update with "maintenance/update.php".
 
+To exclude individual pages for a specific setup, configure their exact target titles in
+`$GLOBALS['mwsgContentProvisionerExcludedTargetTitles']`:
+```php
+$GLOBALS['mwsgContentProvisionerExcludedTargetTitles'] = [
+	'Template:Subpages',
+	'Template:Subpages/styles.css'
+];
+```
+The exclusion applies to both the default import and later content syncs. Language variants that
+share a `target_title` are excluded together; dependent pages such as template styles must be listed
+separately.
+
 ## Custom content provisioners
 
 Extensions may implement their own import logic within their own content provisioners.
