@@ -4,10 +4,10 @@ namespace MWStake\MediaWiki\Component\ContentProvisioner\EntitySync;
 
 use MediaWiki\CommentStore\CommentStoreComment;
 use MediaWiki\Language\Language;
+use MediaWiki\Language\RawMessage;
 use MediaWiki\Languages\LanguageFallback;
 use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Registration\ExtensionRegistry;
-use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Status\Status;
 use MediaWiki\Title\Title;
@@ -111,28 +111,23 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 	 * @inheritDoc
 	 */
 	protected function doSync( string $dbPrefixedKey ): Status {
-		$status = Status::newGood();
-
 		if ( !$this->wikiPagesCollected ) {
 			$this->collectWikiPages();
 		}
 
 		if ( !$this->wikiPages[$dbPrefixedKey] ) {
-			return $status->error( 'No content was found in any of manifests' );
+			return Status::newFatal( new RawMessage( 'No content was found in any of manifests' ) );
 		}
 
 		$title = $this->titleFactory->newFromText( $dbPrefixedKey );
 		$pageContentPath = $this->wikiPages[$dbPrefixedKey]['contentPath'];
 
 		try {
-			if ( !$this->importWikiContent( $title, $pageContentPath ) ) {
-				$status->error( 'Import failed' );
-			}
+			return $this->importWikiContent( $title, $pageContentPath );
 		} catch ( MWContentSerializationException | MWUnknownContentModelException $e ) {
 			$this->logger->error( $e->getMessage() );
+			return Status::newFatal( $e->getMessage() );
 		}
-
-		return $status;
 	}
 
 	/**
@@ -180,15 +175,14 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 	 *
 	 * @param Title $title Target title, which should be imported
 	 * @param string $contentPath Path to the page content. Usually retrieved from manifest file
-	 * @return bool <tt>true</tt> if success, <tt>false</tt> otherwise
+	 * @return Status
 	 * @throws MWContentSerializationException
 	 * @throws MWUnknownContentModelException
 	 */
-	private function importWikiContent( Title $title, string $contentPath ): bool {
+	private function importWikiContent( Title $title, string $contentPath ): Status {
 		$pageContent = file_get_contents( $contentPath );
 		if ( !$pageContent ) {
-			$this->logger->error( "Page '{$title->getDBkey()}': failed to retrieve page content!" );
-			return false;
+			return Status::newFatal( new RawMessage( 'Failed to retrieve page content!' ) );
 		}
 
 		$wikiPage = $this->wikiPageFactory->newFromTitle( $title );
@@ -198,12 +192,7 @@ class WikiPageSync extends EntitySync implements LoggerAwareInterface {
 
 		$updater = $wikiPage->newPageUpdater( $this->maintenanceUser );
 		$updater->setContent( SlotRecord::MAIN, $content );
-		$newRevision = $updater->saveRevision( $comment );
-		if ( $newRevision instanceof RevisionRecord ) {
-			return true;
-		} else {
-			$this->logger->error( "Page '{$title->getDBkey()}': failed to create page!" );
-			return false;
-		}
+		$updater->saveRevision( $comment );
+		return $updater->getStatus();
 	}
 }
